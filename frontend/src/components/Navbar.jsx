@@ -12,7 +12,7 @@ const IXLogo = () => (
       <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" style={{ boxShadow: "0 0 16px rgba(79,70,229,0.6)" }} />
     </div>
     <span className="font-display font-bold text-lg text-ix-white tracking-tight">
-      Incept<span className="text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(135deg,#4f46e5,#06b6d4)" }}>aX</span>
+      Incepta<span className="text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(135deg,#4f46e5,#06b6d4)" }}>X</span>
     </span>
   </Link>
 );
@@ -40,8 +40,10 @@ export default function Navbar() {
   };
 
   const isPremium = user?.plan !== "free" && user?.planExpiresAt && new Date() < new Date(user.planExpiresAt);
-  const avatar = user?.profileImage || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || "U"}&backgroundColor=4f46e5&textColor=ffffff`;
-
+  const avatar =
+  user?.profileImage && user.profileImage.startsWith("http")
+    ? user.profileImage
+    : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || "U")}&backgroundColor=4f46e5&textColor=ffffff`;
   return (
     <nav className="sticky top-0 z-50 border-b border-ix-border" style={{ background: "rgba(3,3,10,0.85)", backdropFilter: "blur(20px)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">

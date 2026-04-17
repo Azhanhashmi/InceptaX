@@ -33,31 +33,23 @@ const firebaseAuth = async (req, res, next) => {
 
     const idToken = authHeader.split("Bearer ")[1];
 
-    // DEV MODE: If Firebase not configured, accept a mock token containing email
     if (!firebaseInitialized) {
       return devAuthFallback(req, res, next, idToken);
     }
 
-    // Verify with Firebase Admin
     const decoded = await admin.auth().verifyIdToken(idToken);
     req.firebaseUser = decoded;
 
-    // Get or create the MongoDB user record
+    // 🔥 CHANGE HERE
     let user = await User.findOne({ firebaseUid: decoded.uid });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User profile not found. Please complete registration.",
-        code: "PROFILE_MISSING",
-      });
+
+    // ✅ Don't block — just attach if exists
+    if (user) {
+      req.user = user;
     }
 
-    req.user = user;
-    next();
+    next(); // ✅ ALWAYS continue
   } catch (err) {
-    if (err.code === "auth/id-token-expired") {
-      return res.status(401).json({ success: false, message: "Token expired. Please sign in again." });
-    }
     return res.status(401).json({ success: false, message: "Invalid authentication token." });
   }
 };

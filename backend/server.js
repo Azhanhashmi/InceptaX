@@ -59,6 +59,13 @@ app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).json({ success: false, message: err.message || "Server error" });
 });
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "InceptaX API running",
+    status: "OK"
+  });
+});
+
 // ─── Start ──────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 mongoose

@@ -16,21 +16,33 @@ export default function Challenges() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const t = setTimeout(async () => {
+ useEffect(() => {
+  const fetchAssignments = async () => {
+    try {
       setLoading(true);
-      try {
-        const p = { page, limit: 12 };
-        if (search) p.search = search;
-        if (diff !== "all") p.difficulty = diff;
-        if (showPremium !== "all") p.premium = showPremium === "premium" ? "true" : "false";
-        const r = await api.get("/assignments", { params: p });
-        setAssignments(r.data.assignments);
-        setTotalPages(r.data.pages || 1);
-      } finally { setLoading(false); }
-    }, 280);
-    return () => clearTimeout(t);
-  }, [search, diff, showPremium, page]);
+
+      const p = { page, limit: 12 };
+      if (search) p.search = search;
+      if (diff !== "all") p.difficulty = diff;
+      if (showPremium !== "all") {
+        p.premium = showPremium === "premium" ? "true" : "false";
+      }
+
+      const r = await api.get("/assignments", { params: p });
+
+      console.log("API RESPONSE:", r.data);
+
+      setAssignments(r.data.assignments);
+      setTotalPages(r.data.pages || 1);
+    } catch (err) {
+      console.log("API ERROR:", err.response?.data || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAssignments();
+}, [search, diff, showPremium, page]);
 
   const isPremiumActive = user && user.plan !== "free" && user.planExpiresAt && new Date() < new Date(user.planExpiresAt);
 
@@ -82,7 +94,7 @@ export default function Challenges() {
               return (
                 <Link key={a._id} to={`/challenges/${a._id}`}
                   className="ix-card-hover p-5 block relative"
-                  style={{ animationDelay: `${i * 40}ms`, animation: "fadeUp 0.4s ease forwards", opacity: 0 }}>
+                  style={{ animationDelay: `${i * 40}ms`, animation: "fadeUp 0.4s ease forwards", opacity: 1 }}>
                   {locked && (
                     <div className="absolute top-3 right-3">
                       <span className="badge-premium">✦ Premium</span>

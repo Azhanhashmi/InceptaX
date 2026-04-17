@@ -11,36 +11,46 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // ─── Sync MongoDB profile after Firebase auth ─────────────────────────────
-  const syncProfile = async (fbUser, extraData = {}) => {
-    try {
-      const token = await fbUser.getIdToken();
-      const res = await api.post("/users/sync",
-        { name: fbUser.displayName || extraData.name || "User" },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setUser(res.data.user);
-      return res.data.user;
-    } catch (err) {
-      console.error("Profile sync failed:", err.message);
-      return null;
-    }
-  };
+const syncProfile = async (fbUser, extraData = {}) => {
+  try {
+    const token = await fbUser.getIdToken();
 
+    const res = await api.post(
+      "/users/sync",
+      { name: fbUser.displayName || extraData.name || "User" },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ ensure token always present
+        },
+      }
+    );
+
+    setUser(res.data.user);
+    return res.data.user;
+  } catch (err) {
+    console.error("Profile sync failed:", err.message);
+
+    const fallback = {
+      uid: fbUser.uid,
+      email: fbUser.email,
+      name: fbUser.displayName || extraData.name || "User",
+    };
+
+    setUser(fallback);
+    return fallback;
+  }
+};
   // ─── Listen to Firebase auth state ───────────────────────────────────────
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
-  setFirebaseUser(fbUser);
-
-  if (fbUser) {
-    setLoading(false); // ✅ allow UI immediately
-
-    // run profile sync in background (non-blocking)
-    syncProfile(fbUser);
-  } else {
-    setUser(null);
-    setLoading(false);
-  }
-});
+      setFirebaseUser(fbUser);
+      if (fbUser) {
+        await syncProfile(fbUser);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
     return unsub;
   }, []);
 
@@ -54,40 +64,20 @@ export const AuthProvider = ({ children }) => {
 const registerWithEmail = async (email, password, name) => {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(cred.user, { displayName: name });
-
-  setFirebaseUser(cred.user); // ✅ IMPORTANT
-  setLoading(false);
-
-  syncProfile(cred.user, { name }); // background
 };
 
   // ─── Email/password login ─────────────────────────────────────────────────
  const loginWithEmail = async (email, password) => {
-  const cred = await signInWithEmailAndPassword(auth, email, password);
-
-  setFirebaseUser(cred.user); // ✅ IMPORTANT
-  setLoading(false);
-
-  syncProfile(cred.user); // background
+  await signInWithEmailAndPassword(auth, email, password);
 };
-
+  // ─── Google sign-in ───────────────────────────────────────────────────────
 const loginWithGoogle = async () => {
-  const cred = await signInWithPopup(auth, googleProvider);
-
-  setFirebaseUser(cred.user); // ✅ CRITICAL FIX
-  setLoading(false);
-
-  syncProfile(cred.user); // background
+  await signInWithPopup(auth, googleProvider);
 };
 
-// ─── GitHub sign-in ───────────────────────────────────────────────────────
+  // ─── GitHub sign-in ───────────────────────────────────────────────────────
 const loginWithGitHub = async () => {
-  const cred = await signInWithPopup(auth, githubProvider);
-
-  setFirebaseUser(cred.user); // ✅ IMPORTANT
-  setLoading(false);
-
-  syncProfile(cred.user); // background
+  await signInWithPopup(auth, githubProvider);
 };
 
   // ─── Logout ───────────────────────────────────────────────────────────────

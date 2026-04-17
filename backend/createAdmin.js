@@ -5,10 +5,10 @@ const Admin = require("./models/Admin");
 
 mongoose.connect(process.env.MONGO_URI).then(async () => {
   const admin = await Admin.create({
-    name: "Super Admin",
-    email: "admin12@gmail.com",   // ← your chosen email
-    password: "123456", // ← your chosen password
-    role: "super_admin",
+    name: process.env.ADMIN_NAME,
+   email: process.env.ADMIN_EMAIL,
+password: process.env.ADMIN_PASSWORD,
+    role: "admin",
   });
   console.log("✅ Admin created:", admin.email);
   process.exit(0);

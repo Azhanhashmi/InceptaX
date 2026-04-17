@@ -13,7 +13,9 @@ router.post("/sync", firebaseAuth, async (req, res) => {
           firebaseUid: req.firebaseUser.uid,
           email: req.firebaseUser.email,
           name: req.firebaseUser.name || req.body.name || "User",
-          profileImage: req.firebaseUser.picture || "",
+         profileImage:
+  req.firebaseUser?.picture ||
+  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
         }
       : req.body;
 
