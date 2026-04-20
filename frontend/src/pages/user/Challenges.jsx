@@ -4,10 +4,115 @@ import { formatDistanceToNow, isPast } from "date-fns";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
-const DiffBadge = ({ d }) => <span className={`badge-${d}`}>{d}</span>;
+/* ---------------- BADGE ---------------- */
+const DiffBadge = ({ d }) => {
+  const styles = {
+    easy: "bg-green-500/10 text-green-400",
+    medium: "bg-yellow-500/10 text-yellow-400",
+    hard: "bg-red-500/10 text-red-400",
+  };
 
+  return (
+    <span className={`px-2.5 py-1 text-[10px] rounded-md font-medium ${styles[d]}`}>
+      {d}
+    </span>
+  );
+};
+
+/* ---------------- CARD ---------------- */
+const ChallengeCard = ({ a, i, isPremiumActive }) => {
+  const expired = isPast(new Date(a.deadline));
+  const locked = a.isPremium && !isPremiumActive;
+
+  return (
+    <Link
+      to={`/challenges/${a._id}`}
+      className="group relative h-full flex flex-col p-5 rounded-2xl border border-white/10 bg-[#0B0F19] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-white/20"
+      style={{
+        animationDelay: `${i * 40}ms`,
+        animation: "fadeUp 0.4s ease forwards",
+      }}
+    >
+      {/* PREMIUM BADGE */}
+      {locked && (
+        <div className="absolute top-3 right-3">
+          <span className="text-[10px] px-2 py-1 rounded-md bg-yellow-500/10 text-yellow-400">
+            ✦ Premium
+          </span>
+        </div>
+      )}
+
+      {/* CONTENT */}
+      <div className="flex flex-col h-full">
+        <div className="flex-1">
+          {a.coverImage && (
+            <div className="w-full h-28 rounded-lg mb-4 overflow-hidden">
+              <img
+                src={a.coverImage}
+                className="w-full h-full object-cover"
+                alt=""
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 mb-3">
+            <DiffBadge d={a.difficulty} />
+            {a.prize && (
+              <span className="text-xs font-mono text-yellow-400">
+                🏆 {a.prize}
+              </span>
+            )}
+          </div>
+
+          <h3 className="font-semibold text-white text-base leading-tight mb-2 line-clamp-2">
+            {a.title}
+          </h3>
+
+          <p className="text-sm text-white/70 mb-4 line-clamp-3">
+            {a.description}
+          </p>
+
+          {a.tags?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {a.tags.slice(0, 3).map((t) => (
+                <span
+                  key={t}
+                  className="text-xs px-2 py-1 rounded-md bg-white/5 text-white/70 border border-white/10"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* FOOTER */}
+        <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-auto">
+          <span className="text-xs text-white/60">
+            {a.submissionsCount} built
+          </span>
+
+          <span
+            className={`text-xs ${
+              expired ? "text-red-400" : "text-orange-400"
+            }`}
+          >
+            {expired
+              ? "Ended"
+              : formatDistanceToNow(new Date(a.deadline), {
+                  addSuffix: true,
+                })}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+/* ---------------- MAIN PAGE ---------------- */
 export default function Challenges() {
   const { user } = useAuth();
+
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -16,123 +121,126 @@ export default function Challenges() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
- useEffect(() => {
-  const fetchAssignments = async () => {
-    try {
-      setLoading(true);
+  const isPremiumActive =
+    user &&
+    user.plan !== "free" &&
+    user.planExpiresAt &&
+    new Date() < new Date(user.planExpiresAt);
 
-      const p = { page, limit: 12 };
-      if (search) p.search = search;
-      if (diff !== "all") p.difficulty = diff;
-      if (showPremium !== "all") {
-        p.premium = showPremium === "premium" ? "true" : "false";
+  /* -------- FETCH -------- */
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        setLoading(true);
+
+        const params = { page, limit: 12 };
+        if (search) params.search = search;
+        if (diff !== "all") params.difficulty = diff;
+        if (showPremium !== "all") {
+          params.premium = showPremium === "premium";
+        }
+
+        const res = await api.get("/assignments", { params });
+
+        setAssignments(res.data.assignments || []);
+        setTotalPages(res.data.pages || 1);
+      } catch (err) {
+        console.error("API ERROR:", err);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const r = await api.get("/assignments", { params: p });
+    fetchAssignments();
+  }, [search, diff, showPremium, page]);
 
-      console.log("API RESPONSE:", r.data);
-
-      setAssignments(r.data.assignments);
-      setTotalPages(r.data.pages || 1);
-    } catch (err) {
-      console.log("API ERROR:", err.response?.data || err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchAssignments();
-}, [search, diff, showPremium, page]);
-
-  const isPremiumActive = user && user.plan !== "free" && user.planExpiresAt && new Date() < new Date(user.planExpiresAt);
-
+  /* -------- UI -------- */
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 page-enter">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      {/* HEADER */}
       <div className="mb-8">
-        <h1 className="font-display font-bold text-3xl text-ix-white mb-2">Challenges</h1>
-        <p className="text-ix-muted">Pick a challenge, build something great, get ranked.</p>
+        <h1 className="text-3xl font-bold text-white mb-2">Challenges</h1>
+        <p className="text-white/60">
+          Pick a challenge, build something great, get ranked.
+        </p>
       </div>
 
-      {/* Filters */}
+      {/* FILTERS */}
       <div className="flex flex-col sm:flex-row gap-3 mb-7">
-        <div className="relative flex-1">
-          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ix-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input className="ix-input pl-10" placeholder="Search challenges…" value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }} />
-        </div>
+        <input
+          className="flex-1 px-4 py-2 rounded-lg bg-[#0B0F19] border border-white/10 text-white placeholder:text-white/40"
+          placeholder="Search challenges..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+        />
+
         <div className="flex gap-2 flex-wrap">
-          {["all", "easy", "medium", "hard"].map(d => (
-            <button key={d} onClick={() => { setDiff(d); setPage(1); }}
-              className={`px-3 py-2 rounded-xl text-xs font-display font-semibold capitalize transition-all ${diff === d ? "bg-ix-primary text-white" : "border border-ix-border text-ix-muted hover:border-ix-border-bright"}`}>
+          {["all", "easy", "medium", "hard"].map((d) => (
+            <button
+              key={d}
+              onClick={() => {
+                setDiff(d);
+                setPage(1);
+              }}
+              className={`px-3 py-2 rounded-lg text-xs capitalize ${
+                diff === d
+                  ? "bg-white text-black"
+                  : "border border-white/10 text-white/60"
+              }`}
+            >
               {d}
             </button>
           ))}
-          <button onClick={() => { setShowPremium(showPremium === "premium" ? "all" : "premium"); setPage(1); }}
-            className={`px-3 py-2 rounded-xl text-xs font-mono font-semibold transition-all ${showPremium === "premium" ? "bg-ix-premium/20 text-ix-premium border border-ix-premium/40" : "border border-ix-border text-ix-muted hover:border-ix-border-bright"}`}>
-            ✦ Premium
-          </button>
         </div>
       </div>
 
+      {/* CONTENT */}
       {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {Array(8).fill(0).map((_, i) => <div key={i} className="ix-card h-52 skeleton" />)}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {Array(8)
+            .fill(0)
+            .map((_, i) => (
+              <div key={i} className="h-52 rounded-xl bg-white/5 animate-pulse" />
+            ))}
         </div>
       ) : assignments.length === 0 ? (
-        <div className="ix-card p-16 text-center">
-          <p className="text-ix-muted font-display text-lg mb-2">No challenges found</p>
-          {search && <button onClick={() => setSearch("")} className="text-ix-primary text-sm hover:underline">Clear search</button>}
+        <div className="text-center text-white/50 py-20">
+          No challenges found
         </div>
       ) : (
         <>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {assignments.map((a, i) => {
-              const expired = isPast(new Date(a.deadline));
-              const locked = a.isPremium && !isPremiumActive;
-              return (
-                <Link key={a._id} to={`/challenges/${a._id}`}
-                  className="ix-card-hover p-5 block relative"
-                  style={{ animationDelay: `${i * 40}ms`, animation: "fadeUp 0.4s ease forwards", opacity: 1 }}>
-                  {locked && (
-                    <div className="absolute top-3 right-3">
-                      <span className="badge-premium">✦ Premium</span>
-                    </div>
-                  )}
-                  {a.coverImage && (
-                    <div className="w-full h-28 rounded-lg mb-4 overflow-hidden">
-                      <img src={a.coverImage} className="w-full h-full object-cover" alt="" />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 mb-3">
-                    <DiffBadge d={a.difficulty} />
-                    {a.prize && <span className="text-xs font-mono text-ix-gold">🏆 {a.prize}</span>}
-                  </div>
-                  <h3 className="font-display font-semibold text-ix-white text-sm leading-snug mb-2 line-clamp-2">{a.title}</h3>
-                  <p className="text-ix-muted text-xs leading-relaxed line-clamp-3 mb-4">{a.description}</p>
-                  {a.tags?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {a.tags.slice(0, 3).map(t => (
-                        <span key={t} className="text-[10px] font-mono bg-ix-primary/10 text-ix-primary border border-ix-primary/20 px-2 py-0.5 rounded-md">{t}</span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between pt-3 border-t border-ix-border">
-                    <span className="text-xs text-ix-muted">{a.submissionsCount} built</span>
-                    <span className={`text-xs font-mono ${expired ? "text-red-400" : "text-ix-warning"}`}>
-                      {expired ? "Ended" : formatDistanceToNow(new Date(a.deadline), { addSuffix: true })}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {assignments.map((a, i) => (
+              <ChallengeCard
+                key={a._id}
+                a={a}
+                i={i}
+                isPremiumActive={isPremiumActive}
+              />
+            ))}
           </div>
+
+          {/* PAGINATION */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 mt-10">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-ghost disabled:opacity-30">← Prev</button>
-              <span className="text-xs text-ix-muted font-mono">{page} / {totalPages}</span>
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="btn-ghost disabled:opacity-30">Next →</button>
+            <div className="flex justify-center gap-4 mt-10">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="text-white/60"
+              >
+                ← Prev
+              </button>
+              <span className="text-white/60">
+                {page} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="text-white/60"
+              >
+                Next →
+              </button>
             </div>
           )}
         </>

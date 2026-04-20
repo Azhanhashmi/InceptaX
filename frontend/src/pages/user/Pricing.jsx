@@ -6,8 +6,8 @@ import toast from "react-hot-toast";
 
 const plans = [
   { id: "free", name: "Free", price: 0, period: null, features: ["All public challenges", "AI evaluation (after review)", "Public portfolio /u/username", "Global + project leaderboard"], cta: "Get Started", popular: false },
-  { id: "ten_day", name: "10-Day Sprint", price: 99, period: "10 days", features: ["Everything in Free", "All premium challenges", "Team collaboration (3 members)", "Real-time team chat", "Priority evaluation"], cta: "Start Sprint", popular: false },
-  { id: "monthly", name: "Monthly Pro", price: 199, period: "month", features: ["Everything in Sprint", "Unlimited team members", "Exclusive monthly challenges", "Pro badge on profile", "Early feature access"], cta: "Go Pro", popular: true },
+  { id: "ten_day", name: "10-Day Sprint", price: 9, period: "10 days", features: ["Everything in Free", "All premium challenges", "Team collaboration (3 members)", "Real-time team chat", "Priority evaluation"], cta: "Start Sprint", popular: false },
+  { id: "monthly", name: "Monthly Pro", price: 99, period: "month", features: ["Everything in Sprint", "Unlimited team members", "Exclusive monthly challenges", "Pro badge on profile", "Early feature access"], cta: "Go Pro", popular: true },
 ];
 
 export default function Pricing() {
