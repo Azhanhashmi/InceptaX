@@ -22,8 +22,8 @@ export default function AdminEmailBlast() {
   };
 
   const templates = [
-    { label: "New challenge", body: "<h2 style='color:#F0F0F0'>New challenge live! 🚀</h2><p style='color:#7A7A7A'>Check out the latest challenge on InceptaX and start building.</p><a href='https://inceptax.io/challenges' style='background:#FF6B00;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>View Challenge</a>" },
-    { label: "Upgrade reminder", body: "<h2 style='color:#F0F0F0'>Unlock premium challenges ✦</h2><p style='color:#7A7A7A'>Get access to team collaboration, premium challenges, and more from ₹99.</p><a href='https://inceptax.io/pricing' style='background:#FF6B00;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>Upgrade Now</a>" },
+    { label: "New challenge", body: "<h2 style='color:#F0F0F0'>New challenge live! 🚀</h2><p style='color:#7A7A7A'>Check out the latest challenge on InceptaX and start building.</p><a href='https://inceptax.vercel.app/' style='background:#FF6B00;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>View Challenge</a>" },
+    { label: "Upgrade reminder", body: "<h2 style='color:#F0F0F0'>Unlock premium challenges ✦</h2><p style='color:#7A7A7A'>Get access to team collaboration, premium challenges, and more from ₹99.</p><a href='https://inceptax.vercel.app/pricing' style='background:#FF6B00;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>Upgrade Now</a>" },
   ];
 
   return (
