@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 export default function AdminLogin() {
   const { loginAdmin } = useAdminAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "azhanhashmi788@gmail.com", password: "123456789" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
