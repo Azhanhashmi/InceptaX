@@ -20,8 +20,6 @@ export default function Pricing() {
     if (planId === "free") return;
     setUpgrading(planId);
     try {
-      // In production: integrate Razorpay here before calling /plans/upgrade
-      // For demo: direct upgrade
       const r = await api.post("/plans/upgrade", { plan: planId });
       toast.success(`${planId === "ten_day" ? "10-Day Sprint" : "Monthly Pro"} activated! 🎉`);
     } catch (err) { toast.error(err.response?.data?.message || "Upgrade failed"); }
@@ -31,17 +29,17 @@ export default function Pricing() {
   const isPremiumActive = user?.plan !== "free" && user?.planExpiresAt && new Date() < new Date(user?.planExpiresAt);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 page-enter">
-      <div className="text-center mb-14">
-        <p className="text-xs font-mono text-ix-primary uppercase tracking-widest mb-3">Pricing</p>
-        <h1 className="font-display font-extrabold text-4xl text-ix-white mb-3">Simple, honest pricing</h1>
-        <p className="text-ix-muted text-lg max-w-xl mx-auto">Start free. Upgrade when you need teams and premium challenges.</p>
+    <div className="page-enter" style={{ maxWidth: "900px", margin: "0 auto", padding: "64px 16px" }}>
+      <div style={{ textAlign: "center", marginBottom: "52px" }}>
+        <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ox-orange)", marginBottom: "8px" }}>Pricing</p>
+        <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "clamp(30px,4vw,46px)", color: "var(--ox-text)", letterSpacing: "-0.03em", marginBottom: "12px" }}>Simple, honest pricing</h1>
+        <p style={{ color: "var(--ox-muted)", fontSize: "16px", maxWidth: "480px", margin: "0 auto", fontWeight: 300 }}>Start free. Upgrade when you need teams and premium challenges.</p>
       </div>
 
       {isPremiumActive && (
-        <div className="mb-8 ix-card p-4 text-center" style={{ background: "linear-gradient(135deg,rgba(167,139,250,0.08),rgba(79,70,229,0.08))", borderColor: "rgba(167,139,250,0.3)" }}>
-          <p className="text-ix-premium font-display font-semibold text-sm">✦ You have an active {user.plan === "ten_day" ? "10-Day Sprint" : "Monthly Pro"} plan</p>
-          <p className="text-ix-muted text-xs mt-1">Expires: {new Date(user.planExpiresAt).toLocaleDateString()}</p>
+        <div className="ox-card" style={{ padding: "16px 20px", textAlign: "center", marginBottom: "32px", borderColor: "var(--ox-orange-bd)", background: "var(--ox-orange-lo)" }}>
+          <p style={{ color: "var(--ox-orange)", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontSize: "13.5px" }}>✦ You have an active {user.plan === "ten_day" ? "10-Day Sprint" : "Monthly Pro"} plan</p>
+          <p style={{ color: "var(--ox-muted)", fontSize: "12px", marginTop: "4px" }}>Expires: {new Date(user.planExpiresAt).toLocaleDateString()}</p>
         </div>
       )}
 
@@ -50,41 +48,49 @@ export default function Pricing() {
           const isPopular = plan.popular;
           const isCurrent = user?.plan === plan.id;
           return (
-            <div key={plan.id} className={`ix-card p-7 flex flex-col relative ${isPopular ? "border-ix-primary" : ""}`}
-              style={isPopular ? { boxShadow: "0 0 60px rgba(79,70,229,0.15), 0 0 0 1px rgba(79,70,229,0.3)" } : {}}>
+            <div key={plan.id} className="ox-card" style={{
+              padding: "28px", display: "flex", flexDirection: "column", position: "relative",
+              ...(isPopular ? { borderColor: "var(--ox-orange-bd)", boxShadow: "0 0 48px rgba(255,107,0,0.12), 0 0 0 1px rgba(255,107,0,0.22)" } : {})
+            }}>
               {isPopular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-mono font-semibold text-white" style={{ background: "linear-gradient(135deg,#4f46e5,#06b6d4)" }}>
+                <div style={{ position: "absolute", top: "-13px", left: "50%", transform: "translateX(-50%)",
+                  padding: "3px 14px", borderRadius: "100px", fontSize: "11px",
+                  background: "var(--ox-orange)", color: "#fff", fontWeight: 700, fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>
                   Best Value
                 </div>
               )}
-              <div className="mb-7">
-                <h3 className="font-display font-bold text-ix-white mb-3">{plan.name}</h3>
+              <div style={{ marginBottom: "24px" }}>
+                <h3 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, color: "var(--ox-text)", fontSize: "16px", marginBottom: "12px" }}>{plan.name}</h3>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="font-display font-extrabold text-4xl text-ix-white">{plan.price === 0 ? "Free" : `₹${plan.price}`}</span>
-                  {plan.period && <span className="text-ix-muted text-sm">/ {plan.period}</span>}
+                  <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "38px", color: "var(--ox-text)" }}>{plan.price === 0 ? "Free" : `₹${plan.price}`}</span>
+                  {plan.period && <span style={{ color: "var(--ox-muted)", fontSize: "13px" }}>/ {plan.period}</span>}
                 </div>
               </div>
-              <ul className="space-y-3 mb-8 flex-1">
+              <ul style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px", marginBottom: "28px" }}>
                 {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-xs text-ix-subtle">
-                    <span className="text-emerald-400 mt-0.5 flex-shrink-0 font-mono">✓</span>{f}
+                  <li key={f} className="flex items-start gap-2" style={{ fontSize: "13px", color: "var(--ox-muted)", fontWeight: 300 }}>
+                    <span style={{ color: "#34D399", marginTop: "2px", flexShrink: 0, fontFamily: "'JetBrains Mono',monospace" }}>✓</span>{f}
                   </li>
                 ))}
               </ul>
               <button onClick={() => handleUpgrade(plan.id)} disabled={upgrading === plan.id || isCurrent}
-                className={`w-full py-3 rounded-xl text-sm font-display font-semibold transition-all ${isPopular ? "btn-brand" : isCurrent ? "border border-emerald-500/30 text-emerald-400 cursor-default" : "btn-ghost"}`}>
+                className={isPopular ? "ox-btn-brand" : isCurrent ? "" : "ox-btn-ghost"}
+                style={{
+                  width: "100%", padding: "12px", fontSize: "13.5px", textAlign: "center",
+                  ...(isCurrent ? { border: "1px solid rgba(52,211,153,0.25)", color: "#34D399", background: "rgba(52,211,153,0.05)", borderRadius: "10px", cursor: "default", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600 } : {})
+                }}>
                 {isCurrent ? "✓ Current plan" : upgrading === plan.id ? "Processing…" : plan.cta}
               </button>
               {plan.id !== "free" && (
-                <p className="text-center text-[10px] text-ix-muted mt-3">Payment via Razorpay · Auto-expires</p>
+                <p style={{ textAlign: "center", fontSize: "11px", color: "var(--ox-subtle)", marginTop: "10px" }}>Payment via Razorpay · Auto-expires</p>
               )}
             </div>
           );
         })}
       </div>
 
-      <p className="text-center text-xs text-ix-muted mt-10">
-        Questions? Drop us a line at <span className="text-ix-primary">hello@inceptax.io</span>
+      <p style={{ textAlign: "center", fontSize: "12.5px", color: "var(--ox-muted)", marginTop: "40px" }}>
+        Questions? Drop us a line at <span style={{ color: "var(--ox-orange)" }}>hello@inceptax.io</span>
       </p>
     </div>
   );

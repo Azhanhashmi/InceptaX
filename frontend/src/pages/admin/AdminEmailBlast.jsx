@@ -21,69 +21,75 @@ export default function AdminEmailBlast() {
     } finally { setSending(false); }
   };
 
+  const templates = [
+    { label: "New challenge", body: "<h2 style='color:#F0F0F0'>New challenge live! 🚀</h2><p style='color:#7A7A7A'>Check out the latest challenge on InceptaX and start building.</p><a href='https://inceptax.io/challenges' style='background:#FF6B00;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>View Challenge</a>" },
+    { label: "Upgrade reminder", body: "<h2 style='color:#F0F0F0'>Unlock premium challenges ✦</h2><p style='color:#7A7A7A'>Get access to team collaboration, premium challenges, and more from ₹99.</p><a href='https://inceptax.io/pricing' style='background:#FF6B00;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>Upgrade Now</a>" },
+  ];
+
   return (
-    <div className="page-enter max-w-3xl">
-      <div className="mb-6">
-        <h1 className="font-display font-bold text-2xl text-ix-white">Email Blast</h1>
-        <p className="text-ix-muted text-sm mt-0.5">Send emails directly to your user base</p>
+    <div className="page-enter" style={{ maxWidth: "720px" }}>
+      <div style={{ marginBottom: "24px" }}>
+        <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "26px", color: "var(--ox-text)", marginBottom: "4px" }}>Email Blast</h1>
+        <p style={{ color: "var(--ox-muted)", fontSize: "13.5px" }}>Send emails directly to your user base</p>
       </div>
 
       {result && (
-        <div className="ix-card p-4 border-emerald-500/30 bg-emerald-500/5 mb-6">
-          <p className="text-emerald-400 font-display font-semibold text-sm">✓ Email queued for {result.count} recipients</p>
+        <div className="ox-card" style={{ padding: "16px 20px", marginBottom: "24px", borderColor: "rgba(52,211,153,0.25)", background: "rgba(52,211,153,0.05)" }}>
+          <p style={{ color: "#34D399", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontSize: "13.5px" }}>✓ Email queued for {result.count} recipients</p>
         </div>
       )}
 
-      <div className="ix-card p-7">
-        <form onSubmit={handleSend} className="space-y-5">
+      <div className="ox-card" style={{ padding: "28px" }}>
+        <form onSubmit={handleSend} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div>
-            <label className="ix-label">Target Audience</label>
-            <select className="ix-select" value={form.targetPlan} onChange={e => setForm({ ...form, targetPlan: e.target.value })}>
+            <label className="ox-label">Target Audience</label>
+            <select className="ox-select" value={form.targetPlan} onChange={e => setForm({ ...form, targetPlan: e.target.value })}>
               <option value="">All users</option>
               <option value="free">Free plan users only</option>
               <option value="ten_day">10-Day Sprint users</option>
               <option value="monthly">Monthly Pro users</option>
             </select>
           </div>
+
           <div>
-            <label className="ix-label">Subject Line</label>
-            <input className="ix-input" placeholder="e.g. New challenges are live on InceptaX 🚀" value={form.subject}
+            <label className="ox-label">Subject Line</label>
+            <input className="ox-input" placeholder="e.g. New challenges are live on InceptaX 🚀" value={form.subject}
               onChange={e => setForm({ ...form, subject: e.target.value })} required />
           </div>
+
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="ix-label mb-0">Email Body (HTML)</label>
+            <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
+              <label className="ox-label" style={{ margin: 0 }}>Email Body (HTML)</label>
               <button type="button" onClick={() => setPreview(!preview)}
-                className="text-xs text-ix-primary hover:underline font-mono">
+                style={{ fontSize: "12px", color: "var(--ox-orange)", background: "none", border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono',monospace", textDecoration: "underline" }}>
                 {preview ? "Edit" : "Preview"}
               </button>
             </div>
             {preview ? (
-              <div className="ix-input min-h-[200px] overflow-auto" dangerouslySetInnerHTML={{ __html: form.htmlBody }} />
+              <div className="ox-input" style={{ minHeight: "200px", overflow: "auto" }} dangerouslySetInnerHTML={{ __html: form.htmlBody }} />
             ) : (
-              <textarea className="ix-input resize-none font-mono text-xs" rows={10}
+              <textarea className="ox-input" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", resize: "none" }} rows={10}
                 placeholder={'<h1>Hello!</h1>\n<p>New challenges are live...</p>'}
                 value={form.htmlBody} onChange={e => setForm({ ...form, htmlBody: e.target.value })} required />
             )}
-            <p className="text-xs text-ix-muted mt-1.5">Write HTML directly. Use <code className="text-ix-primary">{"{{name}}"}</code> for personalization (coming soon).</p>
+            <p style={{ fontSize: "11.5px", color: "var(--ox-muted)", marginTop: "6px" }}>
+              Write HTML directly. Use <code style={{ color: "var(--ox-orange)", fontFamily: "'JetBrains Mono',monospace" }}>{"{name}"}</code> for personalization (coming soon).
+            </p>
           </div>
 
           {/* Template shortcuts */}
           <div>
-            <p className="ix-label">Quick Templates</p>
+            <p className="ox-label">Quick Templates</p>
             <div className="flex gap-2 flex-wrap">
-              {[
-                { label: "New challenge", body: "<h2 style='color:#fff'>New challenge live! 🚀</h2><p style='color:#94a3b8'>Check out the latest challenge on InceptaX and start building.</p><a href='https://inceptax.io/challenges' style='background:#4f46e5;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>View Challenge</a>" },
-                { label: "Upgrade reminder", body: "<h2 style='color:#fff'>Unlock premium challenges ✦</h2><p style='color:#94a3b8'>Get access to team collaboration, premium challenges, and more from ₹99.</p><a href='https://inceptax.io/pricing' style='background:linear-gradient(135deg,#4f46e5,#06b6d4);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px'>Upgrade Now</a>" },
-              ].map(t => (
+              {templates.map(t => (
                 <button key={t.label} type="button" onClick={() => setForm(f => ({ ...f, htmlBody: t.body }))}
-                  className="text-xs btn-ghost px-3 py-1.5">{t.label}</button>
+                  className="ox-btn-ghost" style={{ fontSize: "12px", padding: "6px 14px" }}>{t.label}</button>
               ))}
             </div>
           </div>
 
-          <button type="submit" disabled={sending} className="btn-primary w-full py-3">
-            {sending ? "Sending..." : `Send Email Blast →`}
+          <button type="submit" disabled={sending} className="ox-btn-primary" style={{ width: "100%", padding: "13px", fontSize: "14px" }}>
+            {sending ? "Sending..." : "Send Email Blast →"}
           </button>
         </form>
       </div>

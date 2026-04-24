@@ -109,9 +109,9 @@ export default function App() {
           <Toaster
             position="top-right"
             toastOptions={{
-              style: { background: "#0a0a1f", color: "#c8cce8", border: "1px solid #151530", fontFamily: "'Inter', sans-serif", fontSize: "13px", borderRadius: "12px" },
-              success: { iconTheme: { primary: "#10b981", secondary: "#0a0a1f" } },
-              error: { iconTheme: { primary: "#ef4444", secondary: "#0a0a1f" } },
+              style: { background: "#0c0c0c", color: "#F0F0F0", border: "1px solid rgba(255,255,255,0.07)", fontFamily: "'DM Sans', sans-serif", fontSize: "13px", borderRadius: "12px" },
+              success: { iconTheme: { primary: "#34D399", secondary: "#0c0c0c" } },
+              error: { iconTheme: { primary: "#F87171", secondary: "#0c0c0c" } },
             }}
           />
         </AdminAuthProvider>

@@ -32,49 +32,62 @@ export default function SubmitProject() {
     finally { setLoading(false); }
   };
 
-  if (!assignment) return <div className="max-w-xl mx-auto px-4 py-12 space-y-3"><div className="ix-card h-8 skeleton" /><div className="ix-card h-48 skeleton" /></div>;
+  if (!assignment) return (
+    <div style={{ maxWidth: "520px", margin: "0 auto", padding: "48px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div className="ox-skeleton" style={{ height: "32px", width: "60%" }} />
+      <div className="ox-skeleton" style={{ height: "180px" }} />
+    </div>
+  );
 
   return (
-    <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 page-enter">
-      <Link to={`/challenges/${id}`} className="text-xs font-mono text-ix-muted hover:text-ix-subtle flex items-center gap-1 mb-6">← Back</Link>
-      <div className="ix-card p-4 mb-5 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-ix-primary/15 flex items-center justify-center flex-shrink-0">
-          <span className="font-mono text-ix-primary">◈</span>
+    <div className="page-enter" style={{ maxWidth: "520px", margin: "0 auto", padding: "40px 16px" }}>
+      <Link to={`/challenges/${id}`} style={{ fontSize: "12px", fontFamily: "'JetBrains Mono',monospace", color: "var(--ox-muted)", textDecoration: "none", display: "flex", alignItems: "center", gap: "4px", marginBottom: "24px" }}>← Back</Link>
+
+      {/* Challenge info pill */}
+      <div className="ox-card" style={{ padding: "14px 18px", marginBottom: "18px", display: "flex", alignItems: "center", gap: "12px" }}>
+        <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "var(--ox-orange-lo)", border: "1px solid var(--ox-orange-bd)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--ox-orange)", fontSize: "14px" }}>◈</span>
         </div>
         <div>
-          <p className="text-[10px] text-ix-muted font-mono uppercase tracking-widest">Submitting for</p>
-          <p className="font-display font-semibold text-ix-white text-sm">{assignment.title}</p>
+          <p style={{ fontSize: "10.5px", color: "var(--ox-muted)", fontFamily: "'JetBrains Mono',monospace", textTransform: "uppercase", letterSpacing: ".08em" }}>Submitting for</p>
+          <p style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, color: "var(--ox-text)", fontSize: "13.5px" }}>{assignment.title}</p>
         </div>
       </div>
-      <div className="ix-card p-7">
-        <h1 className="font-display font-bold text-xl text-ix-white mb-1">Submit Your Project</h1>
-        <p className="text-ix-muted text-sm mb-7">Your submission will be reviewed by an admin before results are published.</p>
-        <form onSubmit={handleSubmit} className="space-y-5">
+
+      <div className="ox-card" style={{ padding: "28px" }}>
+        <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "22px", color: "var(--ox-text)", marginBottom: "6px" }}>Submit Your Project</h1>
+        <p style={{ color: "var(--ox-muted)", fontSize: "13.5px", marginBottom: "28px", fontWeight: 300 }}>Your submission will be reviewed by an admin before results are published.</p>
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           <div>
-            <label className="ix-label">GitHub Repo URL *</label>
-            <input className="ix-input" type="url" placeholder="https://github.com/you/project" value={form.repoLink} onChange={e => setForm({ ...form, repoLink: e.target.value })} required />
+            <label className="ox-label">GitHub Repo URL *</label>
+            <input className="ox-input" type="url" placeholder="https://github.com/you/project" value={form.repoLink} onChange={e => setForm({ ...form, repoLink: e.target.value })} required />
           </div>
           <div>
-            <label className="ix-label">Live Demo <span className="text-ix-muted normal-case font-body tracking-normal">(optional)</span></label>
-            <input className="ix-input" type="url" placeholder="https://your-app.vercel.app" value={form.liveLink} onChange={e => setForm({ ...form, liveLink: e.target.value })} />
+            <label className="ox-label">Live Demo <span style={{ color: "var(--ox-subtle)", textTransform: "none", letterSpacing: 0, fontFamily: "'Inter',sans-serif", fontWeight: 400 }}>(optional)</span></label>
+            <input className="ox-input" type="url" placeholder="https://your-app.vercel.app" value={form.liveLink} onChange={e => setForm({ ...form, liveLink: e.target.value })} />
           </div>
           <div>
-            <label className="ix-label">Project Description *</label>
-            <textarea className="ix-input resize-none" rows={5} placeholder="Describe what you built, tech stack, key features…" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} required />
-            <p className="text-[10px] text-ix-muted mt-1 font-mono">{form.description.length} chars (min 20)</p>
+            <label className="ox-label">Project Description *</label>
+            <textarea className="ox-input" rows={5} placeholder="Describe what you built, tech stack, key features…" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} required />
+            <p style={{ fontSize: "10.5px", color: "var(--ox-subtle)", marginTop: "6px", fontFamily: "'JetBrains Mono',monospace" }}>{form.description.length} chars (min 20)</p>
           </div>
+
           {isPremiumActive && (
             <div>
-              <label className="ix-label">Team Members <span className="text-ix-premium font-mono text-[10px] normal-case tracking-normal">✦ Premium</span></label>
-              <input className="ix-input" placeholder="username1, username2" value={form.teamMemberUsernames} onChange={e => setForm({ ...form, teamMemberUsernames: e.target.value })} />
-              <p className="text-[10px] text-ix-muted mt-1">Comma-separated InceptaX usernames</p>
+              <label className="ox-label">Team Members <span className="ox-badge-premium" style={{ fontSize: "10px", padding: "2px 7px", marginLeft: "4px" }}>✦ Premium</span></label>
+              <input className="ox-input" placeholder="username1, username2" value={form.teamMemberUsernames} onChange={e => setForm({ ...form, teamMemberUsernames: e.target.value })} />
+              <p style={{ fontSize: "11px", color: "var(--ox-muted)", marginTop: "6px" }}>Comma-separated InceptaX usernames</p>
             </div>
           )}
-          <div className="bg-ix-primary/5 border border-ix-primary/20 rounded-xl p-4">
-            <p className="text-xs font-display font-semibold text-ix-primary mb-1">How evaluation works</p>
-            <p className="text-xs text-ix-muted leading-relaxed">Admin triggers AI analysis of your repo. After review, results and rankings are published. Final score = 70% AI + 30% Admin.</p>
+
+          {/* How it works */}
+          <div style={{ background: "var(--ox-orange-lo)", border: "1px solid var(--ox-orange-bd)", borderRadius: "12px", padding: "16px" }}>
+            <p style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, color: "var(--ox-orange)", fontSize: "12.5px", marginBottom: "6px" }}>How evaluation works</p>
+            <p style={{ fontSize: "12px", color: "var(--ox-muted)", lineHeight: 1.7, fontWeight: 300 }}>Admin triggers AI analysis of your repo. After review, results and rankings are published. Final score = 70% AI + 30% Admin.</p>
           </div>
-          <button type="submit" disabled={loading} className="btn-primary w-full py-3 text-base">
+
+          <button type="submit" disabled={loading} className="ox-btn-primary" style={{ width: "100%", padding: "13px", fontSize: "15px" }}>
             {loading ? "Submitting…" : "Submit Project →"}
           </button>
         </form>

@@ -1,0 +1,335 @@
+<div align="center">
+
+<br />
+
+```
+██╗███╗   ██╗ ██████╗███████╗██████╗ ████████╗ █████╗ ██╗  ██╗
+██║████╗  ██║██╔════╝██╔════╝██╔══██╗╚══██╔══╝██╔══██╗╚██╗██╔╝
+██║██╔██╗ ██║██║     █████╗  ██████╔╝   ██║   ███████║ ╚███╔╝ 
+██║██║╚██╗██║██║     ██╔══╝  ██╔═══╝    ██║   ██╔══██║ ██╔██╗ 
+██║██║ ╚████║╚██████╗███████╗██║        ██║   ██║  ██║██╔╝ ██╗
+╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝
+```
+
+### Build · Submit · Get Ranked
+
+**A premium full-stack hackathon platform with AI-powered evaluation, per-project leaderboards, team collaboration, and a fully separate admin portal.**
+
+</div>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Database Models](#database-models)
+- [Authentication System](#authentication-system)
+- [OTP Email Verification](#otp-email-verification)
+- [AI Evaluation System](#ai-evaluation-system)
+- [Admin Portal](#admin-portal)
+- [Subscription Plans](#subscription-plans)
+- [Team Collaboration & Chat](#team-collaboration--chat)
+- [Leaderboard System](#leaderboard-system)
+- [Email System (Nodemailer)](#email-system-nodemailer)
+- [API Reference](#api-reference)
+- [Environment Variables](#environment-variables)
+- [Getting Started](#getting-started)
+- [Deployment](#deployment)
+
+---
+
+## Overview
+
+**InceptaX** is a production-grade hackathon platform built for developers who want to prove their skills. Users tackle real-world coding challenges, submit GitHub repositories, and receive detailed AI-generated feedback. An entirely separate admin portal controls challenge creation, AI evaluation triggers, submission review, and result publishing.
+
+The platform enforces a **manual review pipeline** — AI never auto-publishes scores. Every result goes through admin approval before users see it, ensuring quality and fairness.
+
+---
+
+## Features
+
+### User Side
+- **Firebase Authentication** — Google, GitHub, or Email sign-in
+- **OTP Email Verification** — 6-digit code sent via Nodemailer on new sign-ups
+- **Browse Challenges** — Filter by difficulty (Easy / Medium / Hard) and Free vs Premium
+- **Project Submission** — Submit a GitHub repo URL, live demo link, and description
+- **Team Collaboration** — Invite partners by username (Premium plans only)
+- **Real-time Team Chat** — Socket.io text chat within a shared submission (Premium only)
+- **Per-Project Leaderboard** — See your rank within every individual challenge
+- **Global Leaderboard** — Ranked by best project score across all challenges
+- **Portfolio Profile** — Unique public URL per user: `/u/:username`
+- **Shareable Profile Link** — One-click copy of your public profile URL
+- **Subscription Plans** — Free / 10-Day Sprint (₹99) / Monthly Pro (₹199)
+
+### Admin Portal (Completely Separate)
+- **Isolated at `/admin-portal`** — Different login, different JWT, no Firebase
+- **Challenge Management** — Create, edit, delete challenges with premium gating
+- **Manual AI Trigger** — Admin presses a button to run OpenAI evaluation on any submission
+- **Submission Review** — Set admin score, add internal notes, approve or reject
+- **Publish & Rank** — Publishing a submission auto-recomputes all ranks for that challenge
+- **User Management** — View all users, manually grant or revoke plans
+- **Email Blast** — Send HTML emails to all users or filter by plan (Free / Sprint / Pro)
+- **Email Logs** — Full history of every email sent through the platform
+- **Stats Dashboard** — Live counts of users, challenges, published results, pending reviews
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, Vite, Tailwind CSS, React Router v6 |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| Auth (Users) | Firebase Authentication (Google, GitHub, Email+Password) |
+| Auth (Admin) | Custom JWT (bcrypt-hashed passwords, separate secret) |
+| AI Evaluation | OpenAI GPT-3.5 Turbo |
+| GitHub Data | GitHub REST API v3 (README + file tree fetch) |
+| Real-time Chat | Socket.io |
+| Email | Nodemailer (SMTP / Gmail App Password) |
+| OTP Verification | Custom 6-digit code + MongoDB TTL index |
+
+---
+
+## Project Structure
+
+```
+inceptax/
+│
+├── backend/
+│   ├── models/
+│   │   ├── User.js           # Firebase UID, username, plan, expiry
+│   │   ├── Admin.js          # Separate admin accounts (bcrypt passwords)
+│   │   ├── Assignment.js     # Challenges with premium flag + required plan
+│   │   ├── Submission.js     # Full evaluation lifecycle model
+│   │   ├── TeamMessage.js    # Real-time chat messages per submission
+│   │   ├── EmailLog.js       # Audit log for every sent email
+│   │   └── OTP.js            # Email verification codes (auto-expiring TTL)
+│   │
+│   ├── routes/
+│   │   ├── users.js          # /api/users — sync, profile, public /u/:username
+│   │   ├── assignments.js    # /api/assignments — public challenge listing
+│   │   ├── submissions.js    # /api/submissions — submit, mine, by assignment
+│   │   ├── leaderboard.js    # /api/leaderboard — global + per-project
+│   │   ├── chat.js           # /api/chat — team chat (premium gate)
+│   │   ├── plans.js          # /api/plans — pricing info + upgrade endpoint
+│   │   ├── otp.js            # /api/otp — send + verify OTP codes
+│   │   └── admin.js          # /api/admin — entire admin portal API
+│   │
+│   ├── middleware/
+│   │   ├── firebaseAuth.js   # Verifies Firebase ID tokens for users
+│   │   ├── adminAuth.js      # Verifies admin JWT tokens
+│   │   └── planGuard.js      # requirePlan() / requirePremium() middleware
+│   │
+│   ├── services/
+│   │   ├── aiService.js      # OpenAI GPT evaluation with mock fallback
+│   │   ├── githubService.js  # Fetches README + file tree from GitHub API
+│   │   └── emailService.js   # Nodemailer: welcome, OTP, blast, upgrade emails
+│   │
+│   ├── server.js             # Express app + Socket.io + MongoDB connect
+│   ├── package.json
+│   └── .env.example
+│
+└── frontend/
+    ├── src/
+    │   ├── context/
+    │   │   ├── AuthContext.jsx       # Firebase auth state + MongoDB sync
+    │   │   └── AdminAuthContext.jsx  # Admin JWT state (localStorage)
+    │   │
+    │   ├── services/
+    │   │   ├── api.js                # Axios + auto Firebase token injection
+    │   │   └── adminApi.js           # Axios + admin JWT injection
+    │   │
+    │   ├── lib/
+    │   │   └── firebase.js           # Firebase app init + providers
+    │   │
+    │   ├── components/
+    │   │   ├── Navbar.jsx            # Auth-aware nav with skeleton loader
+    │   │   └── ui/
+    │   │       └── LoadingScreen.jsx
+    │   │
+    │   ├── pages/
+    │   │   ├── user/
+    │   │   │   ├── Home.jsx              # Landing page with features + pricing
+    │   │   │   ├── Login.jsx             # Sign-in + OTP register flow
+    │   │   │   ├── Dashboard.jsx         # User's submissions + stats
+    │   │   │   ├── Challenges.jsx        # Challenge listing with filters
+    │   │   │   ├── ChallengeDetail.jsx   # Challenge info + mini leaderboard
+    │   │   │   ├── SubmitProject.jsx     # Submission form + team member field
+    │   │   │   ├── SubmissionDetail.jsx  # AI report + team chat
+    │   │   │   ├── Profile.jsx           # Public portfolio at /u/:username
+    │   │   │   ├── Leaderboard.jsx       # Global rankings
+    │   │   │   ├── ProjectLeaderboard.jsx # Per-challenge rankings
+    │   │   │   └── Pricing.jsx           # Plan comparison + upgrade
+    │   │   │
+    │   │   └── admin/
+    │   │       ├── AdminLogin.jsx        # Separate admin login (no Firebase)
+    │   │       ├── AdminLayout.jsx       # Sidebar navigation
+    │   │       ├── AdminOverview.jsx     # Stats + quick actions
+    │   │       ├── AdminChallenges.jsx   # CRUD + premium toggle
+    │   │       ├── AdminSubmissions.jsx  # AI trigger + review + publish
+    │   │       ├── AdminUsers.jsx        # User list + plan management
+    │   │       └── AdminEmailBlast.jsx   # HTML email composer + send
+    │   │
+    │   ├── App.jsx           # Routes + auth guards
+    │   ├── main.jsx
+    │   └── index.css         # Tailwind + premium design tokens
+    │
+    ├── index.html
+    ├── vite.config.js        # Dev server + API proxy + Socket.io proxy
+    ├── tailwind.config.js    # Custom deep-space color system
+    └── package.json
+```
+
+---
+
+## Admin Portal
+
+The admin portal is completely isolated from the user-facing application.
+
+| URL | Description |
+|---|---|
+| `/admin-portal/login` | Admin-only login (email + password, no Firebase) |
+| `/admin-portal` | Stats overview + quick action shortcuts |
+| `/admin-portal/challenges` | Create, edit, delete challenges; toggle premium flag |
+| `/admin-portal/submissions` | Filter by status; trigger AI; review + publish/reject |
+| `/admin-portal/users` | View all users; manually grant/revoke subscription plans |
+| `/admin-portal/email` | Compose and send HTML email blasts to filtered user segments |
+
+### Admin Submission Lifecycle
+
+```
+pending
+  → [Admin clicks "Run AI Eval"] → ai_evaluated
+  → [Admin reviews + saves note]  → admin_reviewed
+  → [Admin clicks "Publish"]      → published  (ranks recomputed)
+  → [Admin clicks "Reject"]       → rejected
+```
+
+Only `published` submissions appear on leaderboards and user profiles.
+
+---
+
+## Subscription Plans
+
+| Plan | Price | Duration | Premium Challenges | Team Chat | Team Size |
+|---|---|---|---|---|---|
+| Free | ₹0 | Unlimited | ❌ | ❌ | Solo only |
+| 10-Day Sprint | ₹99 | 10 days | ✅ | ✅ | Up to 3 |
+| Monthly Pro | ₹199 | 30 days | ✅ | ✅ | Unlimited |
+
+Plans are stored per-user with an `expiresAt` date. Expired plans are checked at runtime — no cron job needed. Admins can also manually grant or revoke plans from the Users panel.
+
+> Payment gateway integration point is in `backend/routes/plans.js` — the `POST /api/plans/upgrade` endpoint is ready for Razorpay or Stripe.
+
+---
+
+## Team Collaboration & Chat
+
+Premium users can invite partners to their project submission:
+
+1. **Add team members** by username when submitting
+2. All team members can view the submission detail page
+3. **Real-time text chat** is available to all team members via Socket.io
+4. Chat is scoped to a single submission — each submission has its own room
+5. Message history is stored in MongoDB (last 200 messages returned on load)
+
+Non-premium users see the chat section but receive an upgrade prompt.
+
+---
+
+## Leaderboard System
+
+InceptaX has two leaderboard types:
+
+### Global Leaderboard `/leaderboard`
+- Aggregates all users who have at least one published submission
+- Ranked by each user's **best single project score**
+- Shows: rank, name, best score, total submissions, average AI score
+- Top 3 displayed in a gold/silver/bronze podium
+
+### Per-Project Leaderboard `/leaderboard/challenge/:id`
+- Scoped to a single challenge
+- Shows every published submission for that challenge
+- Highlights the logged-in user's own rank
+- Ranks recomputed automatically every time admin publishes a new result for that challenge
+
+---
+
+## Email System (Nodemailer)
+
+All platform emails are sent via Nodemailer using SMTP (tested with Gmail App Password).
+
+### Automated Emails
+
+| Trigger | Template | Type |
+|---|---|---|
+| New user signs up (Firebase sync) | Branded welcome with CTA | `welcome` |
+| OTP verification request | Large 6-digit code display | `custom` |
+| User upgrades a plan | Activation confirmation | `plan_upgrade` |
+
+### Admin Email Blast
+
+Admins can compose and send HTML emails to:
+- All users
+- Free plan users only
+- 10-Day Sprint users only
+- Monthly Pro users only
+
+The blast fires asynchronously (100ms delay between sends to avoid rate limits). Every sent email is recorded in `EmailLog` with status, recipient, subject, and body.
+
+### Email Templates
+
+All templates use a consistent dark-themed HTML design matching the platform aesthetic. No external template engine — pure HTML strings with inline styles for maximum email client compatibility.
+
+---
+
+### Challenges
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/assignments` | Public | List challenges (filter: difficulty, search, premium) |
+| `GET` | `/api/assignments/:id` | Public | Get single challenge detail |
+
+### Submissions
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/submissions` | Firebase | Submit a project |
+| `GET` | `/api/submissions/mine` | Firebase | Get own submissions |
+| `GET` | `/api/submissions/:id` | Firebase | Get single submission (published or own) |
+| `GET` | `/api/submissions/assignment/:id` | Public | Published submissions for a challenge |
+| `GET` | `/api/submissions/user/:username` | Public | Published portfolio for a user |
+
+### Leaderboard
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/leaderboard` | Public | Global rankings |
+| `GET` | `/api/leaderboard/assignment/:id` | Public | Per-challenge rankings |
+
+### Plans
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/plans` | Public | Pricing plan info |
+| `POST` | `/api/plans/upgrade` | Firebase | Activate a paid plan |
+
+### OTP
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/otp/send` | Public | Send 6-digit verification code |
+| `POST` | `/api/otp/verify` | Public | Verify submitted code |
+
+### Team Chat
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/chat/:submissionId` | Firebase + Premium | Get message history |
+| `POST` | `/api/chat/:submissionId` | Firebase + Premium | Send a message |
+
+---

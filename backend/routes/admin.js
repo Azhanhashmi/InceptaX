@@ -53,8 +53,8 @@ router.get("/assignments", adminAuth, async (req, res) => {
 
 router.post("/assignments", adminAuth, async (req, res) => {
   try {
-    const { title, description, difficulty, deadline, tags, isPremium, requiredPlan, coverImage, prize } = req.body;
-    const a = await Assignment.create({ title, description, difficulty, deadline, tags: tags || [], isPremium: isPremium || false, requiredPlan: requiredPlan || "free", coverImage, prize, createdBy: req.admin._id });
+    const { title, description, rules, criteria, difficulty, deadline, tags, isPremium, requiredPlan, coverImage, prize } = req.body;
+    const a = await Assignment.create({ title, description, rules: rules || "", criteria: criteria || "", difficulty, deadline, tags: tags || [], isPremium: isPremium || false, requiredPlan: requiredPlan || "free", coverImage, prize, createdBy: req.admin._id });
     res.status(201).json({ success: true, assignment: a });
   } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });

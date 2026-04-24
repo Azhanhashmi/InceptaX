@@ -4,6 +4,8 @@ const assignmentSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 100 },
     description: { type: String, required: true, maxlength: 3000 },
+    rules: { type: String, default: "" },
+   criteria: { type: String, default: "" },
     difficulty: { type: String, enum: ["easy", "medium", "hard"], required: true },
     deadline: { type: Date, required: true },
     tags: [{ type: String, trim: true }],

@@ -4,115 +4,73 @@ import { formatDistanceToNow, isPast } from "date-fns";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
-/* ---------------- BADGE ---------------- */
 const DiffBadge = ({ d }) => {
-  const styles = {
-    easy: "bg-green-500/10 text-green-400",
-    medium: "bg-yellow-500/10 text-yellow-400",
-    hard: "bg-red-500/10 text-red-400",
-  };
-
-  return (
-    <span className={`px-2.5 py-1 text-[10px] rounded-md font-medium ${styles[d]}`}>
-      {d}
-    </span>
-  );
+  const cls = { easy: "ox-badge-easy", medium: "ox-badge-medium", hard: "ox-badge-hard" };
+  return <span className={cls[d] || "ox-badge-free"}>{d}</span>;
 };
 
-/* ---------------- CARD ---------------- */
 const ChallengeCard = ({ a, i, isPremiumActive }) => {
   const expired = isPast(new Date(a.deadline));
   const locked = a.isPremium && !isPremiumActive;
 
   return (
-    <Link
-      to={`/challenges/${a._id}`}
-      className="group relative h-full flex flex-col p-5 rounded-2xl border border-white/10 bg-[#0B0F19] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-white/20"
-      style={{
-        animationDelay: `${i * 40}ms`,
-        animation: "fadeUp 0.4s ease forwards",
-      }}
-    >
-      {/* PREMIUM BADGE */}
+    <Link to={`/challenges/${a._id}`} style={{
+      display: "flex", flexDirection: "column", padding: "22px", borderRadius: "14px",
+      background: "var(--ox-card)", border: "1px solid var(--ox-border)",
+      textDecoration: "none", transition: "all .22s", height: "100%",
+      animationDelay: `${i * 40}ms`, animation: "fadeUp 0.4s ease forwards",
+      position: "relative", overflow: "hidden"
+    }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,107,0,0.25)"; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 10px 36px rgba(0,0,0,0.5)"; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--ox-border)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+
       {locked && (
-        <div className="absolute top-3 right-3">
-          <span className="text-[10px] px-2 py-1 rounded-md bg-yellow-500/10 text-yellow-400">
-            ✦ Premium
-          </span>
+        <div style={{ position: "absolute", top: "12px", right: "12px" }}>
+          <span className="ox-badge-premium">✦ Premium</span>
         </div>
       )}
 
-      {/* CONTENT */}
-      <div className="flex flex-col h-full">
-        <div className="flex-1">
-          {a.coverImage && (
-            <div className="w-full h-28 rounded-lg mb-4 overflow-hidden">
-              <img
-                src={a.coverImage}
-                className="w-full h-full object-cover"
-                alt=""
-              />
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 mb-3">
-            <DiffBadge d={a.difficulty} />
-            {a.prize && (
-              <span className="text-xs font-mono text-yellow-400">
-                🏆 {a.prize}
-              </span>
-            )}
+      <div style={{ flex: 1 }}>
+        {a.coverImage && (
+          <div style={{ width: "100%", height: "110px", borderRadius: "10px", marginBottom: "14px", overflow: "hidden" }}>
+            <img src={a.coverImage} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
           </div>
+        )}
 
-          <h3 className="font-semibold text-white text-base leading-tight mb-2 line-clamp-2">
-            {a.title}
-          </h3>
-
-          <p className="text-sm text-white/70 mb-4 line-clamp-3">
-            {a.description}
-          </p>
-
-          {a.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {a.tags.slice(0, 3).map((t) => (
-                <span
-                  key={t}
-                  className="text-xs px-2 py-1 rounded-md bg-white/5 text-white/70 border border-white/10"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
+        <div className="flex items-center gap-2" style={{ marginBottom: "10px", flexWrap: "wrap" }}>
+          <DiffBadge d={a.difficulty} />
+          {a.prize && <span style={{ fontSize: "11.5px", fontFamily: "'JetBrains Mono',monospace", color: "#FBBF24" }}>🏆 {a.prize}</span>}
         </div>
 
-        {/* FOOTER */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-auto">
-          <span className="text-xs text-white/60">
-            {a.submissionsCount} built
-          </span>
+        <h3 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, color: "var(--ox-text)", fontSize: "15px", lineHeight: 1.35, marginBottom: "8px" }}>
+          {a.title}
+        </h3>
 
-          <span
-            className={`text-xs ${
-              expired ? "text-red-400" : "text-orange-400"
-            }`}
-          >
-            {expired
-              ? "Ended"
-              : formatDistanceToNow(new Date(a.deadline), {
-                  addSuffix: true,
-                })}
-          </span>
-        </div>
+        <p style={{ fontSize: "12.5px", color: "var(--ox-muted)", lineHeight: 1.65, marginBottom: "14px", fontWeight: 300 }}>
+          {a.description?.slice(0, 100)}{a.description?.length > 100 ? "…" : ""}
+        </p>
+
+        {a.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5" style={{ marginBottom: "12px" }}>
+            {a.tags.slice(0, 3).map((t) => (
+              <span key={t} style={{ fontSize: "11px", padding: "3px 8px", borderRadius: "6px", background: "rgba(255,255,255,0.04)", color: "var(--ox-muted)", border: "1px solid var(--ox-border)" }}>{t}</span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between" style={{ paddingTop: "12px", borderTop: "1px solid var(--ox-border)", marginTop: "auto" }}>
+        <span style={{ fontSize: "11.5px", color: "var(--ox-muted)" }}>{a.submissionsCount} built</span>
+        <span style={{ fontSize: "11.5px", color: expired ? "#F87171" : "var(--ox-orange)" }}>
+          {expired ? "Ended" : formatDistanceToNow(new Date(a.deadline), { addSuffix: true })}
+        </span>
       </div>
     </Link>
   );
 };
 
-/* ---------------- MAIN PAGE ---------------- */
 export default function Challenges() {
   const { user } = useAuth();
-
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -121,126 +79,74 @@ export default function Challenges() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const isPremiumActive =
-    user &&
-    user.plan !== "free" &&
-    user.planExpiresAt &&
-    new Date() < new Date(user.planExpiresAt);
+  const isPremiumActive = user && user.plan !== "free" && user.planExpiresAt && new Date() < new Date(user.planExpiresAt);
 
-  /* -------- FETCH -------- */
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
         setLoading(true);
-
         const params = { page, limit: 12 };
         if (search) params.search = search;
         if (diff !== "all") params.difficulty = diff;
-        if (showPremium !== "all") {
-          params.premium = showPremium === "premium";
-        }
-
+        if (showPremium !== "all") { params.premium = showPremium === "premium"; }
         const res = await api.get("/assignments", { params });
-
         setAssignments(res.data.assignments || []);
         setTotalPages(res.data.pages || 1);
-      } catch (err) {
-        console.error("API ERROR:", err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error("API ERROR:", err); }
+      finally { setLoading(false); }
     };
-
     fetchAssignments();
   }, [search, diff, showPremium, page]);
 
-  /* -------- UI -------- */
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-      {/* HEADER */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Challenges</h1>
-        <p className="text-white/60">
-          Pick a challenge, build something great, get ranked.
-        </p>
+    <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "40px 16px" }}>
+      {/* Header */}
+      <div style={{ marginBottom: "32px" }}>
+        <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "30px", color: "var(--ox-text)", marginBottom: "6px" }}>Challenges</h1>
+        <p style={{ color: "var(--ox-muted)", fontSize: "14px" }}>Pick a challenge, build something great, get ranked.</p>
       </div>
 
-      {/* FILTERS */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-7">
-        <input
-          className="flex-1 px-4 py-2 rounded-lg bg-[#0B0F19] border border-white/10 text-white placeholder:text-white/40"
-          placeholder="Search challenges..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3" style={{ marginBottom: "28px" }}>
+        <input className="ox-input" style={{ flex: 1, padding: "10px 16px" }} placeholder="Search challenges..."
+          value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
         <div className="flex gap-2 flex-wrap">
           {["all", "easy", "medium", "hard"].map((d) => (
-            <button
-              key={d}
-              onClick={() => {
-                setDiff(d);
-                setPage(1);
-              }}
-              className={`px-3 py-2 rounded-lg text-xs capitalize ${
-                diff === d
-                  ? "bg-white text-black"
-                  : "border border-white/10 text-white/60"
-              }`}
-            >
+            <button key={d} onClick={() => { setDiff(d); setPage(1); }} style={{
+              padding: "9px 14px", borderRadius: "10px", fontSize: "12px",
+              fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, cursor: "pointer",
+              textTransform: "capitalize", transition: "all .2s",
+              background: diff === d ? "var(--ox-orange)" : "none",
+              color: diff === d ? "#fff" : "var(--ox-muted)",
+              border: diff === d ? "1px solid transparent" : "1px solid var(--ox-border)",
+              boxShadow: diff === d ? "0 2px 12px rgba(255,107,0,0.28)" : "none"
+            }}>
               {d}
             </button>
           ))}
         </div>
       </div>
 
-      {/* CONTENT */}
+      {/* Content */}
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {Array(8)
-            .fill(0)
-            .map((_, i) => (
-              <div key={i} className="h-52 rounded-xl bg-white/5 animate-pulse" />
-            ))}
+          {Array(8).fill(0).map((_, i) => <div key={i} className="ox-skeleton" style={{ height: "220px" }} />)}
         </div>
       ) : assignments.length === 0 ? (
-        <div className="text-center text-white/50 py-20">
-          No challenges found
-        </div>
+        <div style={{ textAlign: "center", color: "var(--ox-muted)", padding: "80px 0", fontSize: "14px" }}>No challenges found</div>
       ) : (
         <>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {assignments.map((a, i) => (
-              <ChallengeCard
-                key={a._id}
-                a={a}
-                i={i}
-                isPremiumActive={isPremiumActive}
-              />
+              <ChallengeCard key={a._id} a={a} i={i} isPremiumActive={isPremiumActive} />
             ))}
           </div>
 
-          {/* PAGINATION */}
           {totalPages > 1 && (
-            <div className="flex justify-center gap-4 mt-10">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="text-white/60"
-              >
-                ← Prev
-              </button>
-              <span className="text-white/60">
-                {page} / {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="text-white/60"
-              >
-                Next →
-              </button>
+            <div className="flex justify-center gap-4" style={{ marginTop: "40px" }}>
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} className="ox-btn-ghost" style={{ fontSize: "13px", padding: "8px 18px" }}>← Prev</button>
+              <span style={{ display: "flex", alignItems: "center", color: "var(--ox-muted)", fontSize: "13px", fontFamily: "'JetBrains Mono',monospace" }}>{page} / {totalPages}</span>
+              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="ox-btn-ghost" style={{ fontSize: "13px", padding: "8px 18px" }}>Next →</button>
             </div>
           )}
         </>

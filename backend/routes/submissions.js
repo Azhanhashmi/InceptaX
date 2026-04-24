@@ -12,7 +12,8 @@ router.post("/", firebaseAuth, async (req, res) => {
     const { assignmentId, repoLink, liveLink, description, teamMemberUsernames } = req.body;
 
     const assignment = await Assignment.findById(assignmentId);
-    if (!assignment) return res.status(404).json({ success: false, message: "Assignment not found." });
+    if (!assignment)
+      return res.status(404).json({ success: false, message: "Assignment not found." });
 
     // Premium gate check
     if (assignment.isPremium || assignment.requiredPlan !== "free") {
@@ -20,7 +21,13 @@ router.post("/", firebaseAuth, async (req, res) => {
       const planOrder = { free: 0, ten_day: 1, monthly: 2 };
       const required = planOrder[assignment.requiredPlan] || 1;
       const userLevel = planOrder[user.plan] || 0;
-      if (userLevel < required || (user.plan !== "free" && user.planExpiresAt && new Date() > user.planExpiresAt)) {
+
+      if (
+        userLevel < required ||
+        (user.plan !== "free" &&
+          user.planExpiresAt &&
+          new Date() > user.planExpiresAt)
+      ) {
         return res.status(403).json({
           success: false,
           message: "This is a premium challenge. Please upgrade your plan.",
@@ -30,13 +37,24 @@ router.post("/", firebaseAuth, async (req, res) => {
     }
 
     // Duplicate check
-    const existing = await Submission.findOne({ userId: req.user._id, assignmentId });
-    if (existing) return res.status(400).json({ success: false, message: "You have already submitted for this challenge." });
+    const existing = await Submission.findOne({
+      userId: req.user._id,
+      assignmentId,
+    });
 
-    // Resolve team member IDs (premium only)
+    if (existing)
+      return res.status(400).json({
+        success: false,
+        message: "You have already submitted for this challenge.",
+      });
+
+    // Team members
     let teamMembers = [];
     if (teamMemberUsernames?.length && req.user.isPremium) {
-      const members = await User.find({ username: { $in: teamMemberUsernames } }).select("_id");
+      const members = await User.find({
+        username: { $in: teamMemberUsernames },
+      }).select("_id");
+
       teamMembers = members.map((m) => m._id);
     }
 
@@ -50,16 +68,55 @@ router.post("/", firebaseAuth, async (req, res) => {
       status: "pending",
     });
 
-    await Assignment.findByIdAndUpdate(assignmentId, { $inc: { submissionsCount: 1 } });
-    await User.findByIdAndUpdate(req.user._id, { $inc: { submissionsCount: 1 } });
+    // update counters
+    await Assignment.findByIdAndUpdate(assignmentId, {
+      $inc: { submissionsCount: 1 },
+    });
 
-    res.status(201).json({ success: true, message: "Submission received! Awaiting admin review.", submission });
+    await User.findByIdAndUpdate(req.user._id, {
+      $inc: { submissionsCount: 1 },
+    });
+
+    // email (safe version)
+    const user = await User.findById(req.user._id);
+
+    sendEmail({
+      to: user.email,
+      subject: "Submission Received 🚀",
+      html: `
+        <h2>Submission Received</h2>
+        <p>Your project has been submitted successfully.</p>
+        <p>We will review it and update you soon.</p>
+      `,
+      attachments: [
+        {
+          filename: "submission.txt",
+          content: `Repo: ${repoLink}\nLive: ${liveLink}\nDescription: ${description}`,
+        },
+      ],
+      userId: user._id,
+      type: "submission_result",
+    }).catch((err) => console.error("Email error:", err));
+
+    return res.status(201).json({
+      success: true,
+      message: "Submission received! Awaiting admin review.",
+      submission,
+    });
   } catch (err) {
-    if (err.code === 11000) return res.status(400).json({ success: false, message: "You have already submitted." });
-    res.status(500).json({ success: false, message: err.message });
+    if (err.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already submitted.",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 });
-
 // ─── GET /api/submissions/mine  (own submissions) ────────────────────────────
 router.get("/mine", firebaseAuth, async (req, res) => {
   try {

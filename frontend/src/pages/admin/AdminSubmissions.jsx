@@ -3,12 +3,12 @@ import { format } from "date-fns";
 import adminApi from "../../services/adminApi";
 import toast from "react-hot-toast";
 
-const STATUS_COLORS = {
-  pending: "text-ix-muted border-ix-border",
-  ai_evaluated: "text-amber-400 border-amber-500/30 bg-amber-500/5",
-  admin_reviewed: "text-blue-400 border-blue-500/30 bg-blue-500/5",
-  published: "text-emerald-400 border-emerald-500/30 bg-emerald-500/5",
-  rejected: "text-red-400 border-red-500/30 bg-red-500/5",
+const STATUS_STYLES = {
+  pending:        { color: "var(--ox-muted)", bg: "rgba(255,255,255,0.04)", border: "var(--ox-border)" },
+  ai_evaluated:   { color: "#FBBF24", bg: "rgba(251,191,36,0.07)", border: "rgba(251,191,36,0.25)" },
+  admin_reviewed: { color: "#60a5fa", bg: "rgba(96,165,250,0.07)", border: "rgba(96,165,250,0.25)" },
+  published:      { color: "#34D399", bg: "rgba(52,211,153,0.07)", border: "rgba(52,211,153,0.25)" },
+  rejected:       { color: "#F87171", bg: "rgba(248,113,113,0.07)", border: "rgba(248,113,113,0.25)" },
 };
 
 export default function AdminSubmissions() {
@@ -19,7 +19,7 @@ export default function AdminSubmissions() {
   const [reviewForm, setReviewForm] = useState({ adminScore: "", adminNote: "" });
   const [actionLoading, setActionLoading] = useState(false);
 
-  const fetch = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       const q = filter !== "all" ? `?status=${filter}` : "";
@@ -28,17 +28,16 @@ export default function AdminSubmissions() {
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { fetch(); }, [filter]);
+  useEffect(() => { fetchData(); }, [filter]);
 
   const triggerAI = async (id) => {
     setActionLoading(id);
     try {
       await adminApi.post(`/submissions/${id}/evaluate`);
       toast.success("AI evaluation complete!");
-      fetch();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Evaluation failed");
-    } finally { setActionLoading(null); }
+      fetchData();
+    } catch (err) { toast.error(err.response?.data?.message || "Evaluation failed"); }
+    finally { setActionLoading(null); }
   };
 
   const review = async (id, action) => {
@@ -46,132 +45,129 @@ export default function AdminSubmissions() {
     try {
       await adminApi.patch(`/submissions/${id}/review`, {
         adminScore: reviewForm.adminScore ? parseInt(reviewForm.adminScore) : undefined,
-        adminNote: reviewForm.adminNote,
-        action,
+        adminNote: reviewForm.adminNote, action,
       });
       toast.success(action === "publish" ? "Published!" : action === "reject" ? "Rejected" : "Saved");
-      setSelected(null);
-      fetch();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Action failed");
-    } finally { setActionLoading(null); }
+      setSelected(null); fetchData();
+    } catch (err) { toast.error(err.response?.data?.message || "Action failed"); }
+    finally { setActionLoading(null); }
   };
 
   const filtered = submissions;
 
   return (
     <div className="page-enter">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between" style={{ marginBottom: "24px" }}>
         <div>
-          <h1 className="font-display font-bold text-2xl text-ix-white">Submissions</h1>
-          <p className="text-ix-muted text-sm mt-0.5">Evaluate and publish project results</p>
+          <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "26px", color: "var(--ox-text)", marginBottom: "4px" }}>Submissions</h1>
+          <p style={{ color: "var(--ox-muted)", fontSize: "13.5px" }}>Evaluate and publish project results</p>
         </div>
       </div>
 
-      {/* Status filter */}
-      <div className="flex gap-2 mb-6 flex-wrap">
+      {/* Status filters */}
+      <div className="flex gap-2 flex-wrap" style={{ marginBottom: "24px" }}>
         {["all", "pending", "ai_evaluated", "admin_reviewed", "published", "rejected"].map((s) => (
-          <button key={s} onClick={() => setFilter(s)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium capitalize transition-all ${filter === s ? "bg-ix-primary text-white" : "border border-ix-border text-ix-muted hover:border-ix-border-bright"}`}>
+          <button key={s} onClick={() => setFilter(s)} style={{
+            padding: "7px 14px", borderRadius: "9px", fontSize: "11.5px",
+            fontFamily: "'JetBrains Mono',monospace", fontWeight: 600, cursor: "pointer",
+            textTransform: "capitalize", transition: "all .2s",
+            background: filter === s ? "var(--ox-orange)" : "none",
+            color: filter === s ? "#fff" : "var(--ox-muted)",
+            border: filter === s ? "1px solid transparent" : "1px solid var(--ox-border)",
+            boxShadow: filter === s ? "0 2px 10px rgba(255,107,0,0.25)" : "none"
+          }}>
             {s.replace("_", " ")}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="space-y-2">{Array(5).fill(0).map((_, i) => <div key={i} className="ix-card h-16 skeleton" />)}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>{Array(5).fill(0).map((_, i) => <div key={i} className="ox-skeleton" style={{ height: "64px" }} />)}</div>
       ) : (
-        <div className="ix-card overflow-hidden">
-          <div className="divide-y divide-ix-border">
-            {filtered.map((sub) => (
-              <div key={sub._id} className="p-4 hover:bg-ix-card-hover transition-colors">
+        <div className="ox-card" style={{ overflow: "hidden" }}>
+          {filtered.map((sub, idx) => {
+            const ss = STATUS_STYLES[sub.status] || STATUS_STYLES.pending;
+            return (
+              <div key={sub._id} style={{ padding: "16px 20px", transition: "background .2s", borderBottom: idx < filtered.length - 1 ? "1px solid var(--ox-border)" : "none" }}
+                onMouseEnter={e => e.currentTarget.style.background = "#0e0e0e"}
+                onMouseLeave={e => e.currentTarget.style.background = "none"}>
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-display font-semibold text-sm text-ix-white">
-                        {sub.userId?.name}
-                      </span>
-                      <span className="text-ix-muted text-xs font-mono">@{sub.userId?.username}</span>
-                      <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${STATUS_COLORS[sub.status] || ""}`}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: "4px" }}>
+                      <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontSize: "13.5px", color: "var(--ox-text)" }}>{sub.userId?.name}</span>
+                      <span style={{ fontSize: "11px", color: "var(--ox-muted)", fontFamily: "'JetBrains Mono',monospace" }}>@{sub.userId?.username}</span>
+                      <span style={{ fontSize: "10.5px", fontFamily: "'JetBrains Mono',monospace", padding: "2px 8px", borderRadius: "100px", color: ss.color, background: ss.bg, border: `1px solid ${ss.border}` }}>
                         {sub.status.replace("_", " ")}
                       </span>
                     </div>
-                    <p className="text-ix-muted text-xs mb-1">
-                      Challenge: <span className="text-ix-subtle">{sub.assignmentId?.title}</span>
+                    <p style={{ fontSize: "12px", color: "var(--ox-muted)", marginBottom: "3px" }}>
+                      Challenge: <span style={{ color: "var(--ox-subtle)" }}>{sub.assignmentId?.title}</span>
                     </p>
-                    <a href={sub.repoLink} target="_blank" rel="noreferrer" className="text-ix-primary text-xs font-mono hover:underline">
-                      {sub.repoLink.replace("https://", "")}
+                    <a href={sub.repoLink} target="_blank" rel="noreferrer" style={{ fontSize: "11.5px", color: "var(--ox-orange)", fontFamily: "'JetBrains Mono',monospace", textDecoration: "none" }}>
+                      {sub.repoLink?.replace("https://", "")}
                     </a>
                     {sub.status === "ai_evaluated" && (
-                      <div className="flex items-center gap-3 mt-2 text-xs font-mono">
-                        <span className="text-amber-400">AI Score: {sub.aiScore}/100</span>
-                      </div>
+                      <div style={{ marginTop: "6px", fontSize: "11.5px", fontFamily: "'JetBrains Mono',monospace", color: "#FBBF24" }}>AI Score: {sub.aiScore}/100</div>
                     )}
                     {sub.status === "published" && (
-                      <div className="flex items-center gap-3 mt-1 text-xs font-mono">
-                        <span className="text-emerald-400">Final: {sub.finalScore}/100</span>
-                        <span className="text-ix-muted">Rank #{sub.rank}</span>
+                      <div className="flex items-center gap-3" style={{ marginTop: "4px", fontSize: "11.5px", fontFamily: "'JetBrains Mono',monospace" }}>
+                        <span style={{ color: "#34D399" }}>Final: {sub.finalScore}/100</span>
+                        <span style={{ color: "var(--ox-muted)" }}>Rank #{sub.rank}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
                     {sub.status === "pending" && (
-                      <button onClick={() => triggerAI(sub._id)}
-                        disabled={actionLoading === sub._id}
-                        className="text-xs font-display font-medium px-3 py-1.5 rounded-lg border border-ix-primary/40 text-ix-primary hover:bg-ix-primary/10 transition-all disabled:opacity-50">
+                      <button onClick={() => triggerAI(sub._id)} disabled={actionLoading === sub._id}
+                        style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "9px", border: "1px solid var(--ox-orange-bd)", color: "var(--ox-orange)", background: "var(--ox-orange-lo)", cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, opacity: actionLoading === sub._id ? 0.5 : 1, transition: "all .2s" }}>
                         {actionLoading === sub._id ? "Running AI..." : "🤖 Run AI Eval"}
                       </button>
                     )}
                     {(sub.status === "ai_evaluated" || sub.status === "admin_reviewed") && (
                       <button onClick={() => { setSelected(sub); setReviewForm({ adminScore: sub.adminScore || "", adminNote: sub.adminNote || "" }); }}
-                        className="text-xs font-display font-medium px-3 py-1.5 rounded-lg border border-ix-border text-ix-text hover:border-ix-border-bright transition-all">
+                        className="ox-btn-ghost" style={{ fontSize: "12px", padding: "6px 12px" }}>
                         Review
                       </button>
                     )}
                     {sub.aiFeedback?.strengths?.length > 0 && (
-                      <button onClick={() => setSelected(sub)}
-                        className="text-xs text-ix-muted hover:text-ix-text border border-ix-border px-3 py-1.5 rounded-lg transition-all">
+                      <button onClick={() => setSelected(sub)} className="ox-btn-ghost" style={{ fontSize: "12px", padding: "6px 12px" }}>
                         View Report
                       </button>
                     )}
                   </div>
                 </div>
               </div>
-            ))}
-            {filtered.length === 0 && (
-              <div className="p-12 text-center text-ix-muted">No submissions found.</div>
-            )}
-          </div>
+            );
+          })}
+          {filtered.length === 0 && <div style={{ padding: "48px", textAlign: "center", color: "var(--ox-muted)", fontSize: "13.5px" }}>No submissions found.</div>}
         </div>
       )}
 
       {/* Review Modal */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="ix-card w-full max-w-2xl max-h-[90vh] overflow-y-auto p-7">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display font-bold text-ix-white text-lg">
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px", background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}>
+          <div className="ox-card" style={{ width: "100%", maxWidth: "640px", maxHeight: "90vh", overflowY: "auto", padding: "28px" }}>
+            <div className="flex items-center justify-between" style={{ marginBottom: "24px" }}>
+              <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, color: "var(--ox-text)", fontSize: "18px" }}>
                 {selected.status === "published" ? "View Report" : "Review Submission"}
               </h2>
-              <button onClick={() => setSelected(null)} className="text-ix-muted hover:text-ix-white text-xl">×</button>
+              <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: "var(--ox-muted)", cursor: "pointer", fontSize: "22px", lineHeight: 1 }}>×</button>
             </div>
 
-            {/* AI Feedback */}
             {selected.aiFeedback?.strengths?.length > 0 && (
-              <div className="mb-6">
-                <p className="text-xs font-mono text-ix-muted mb-3">AI Score: <span className="text-amber-400 font-bold">{selected.aiScore}/100</span></p>
+              <div style={{ marginBottom: "24px" }}>
+                <p style={{ fontSize: "12px", fontFamily: "'JetBrains Mono',monospace", color: "var(--ox-muted)", marginBottom: "12px" }}>AI Score: <span style={{ color: "#FBBF24", fontWeight: 700 }}>{selected.aiScore}/100</span></p>
                 <div className="grid sm:grid-cols-3 gap-3">
                   {[
-                    { label: "Strengths", items: selected.aiFeedback.strengths, color: "emerald" },
-                    { label: "Weaknesses", items: selected.aiFeedback.weaknesses, color: "red" },
-                    { label: "Suggestions", items: selected.aiFeedback.suggestions, color: "blue" },
-                  ].map(({ label, items, color }) => (
-                    <div key={label} className={`bg-${color}-500/5 border border-${color}-500/20 rounded-xl p-4`}>
-                      <p className={`text-${color}-400 text-xs font-display font-semibold mb-2`}>{label}</p>
-                      <ul className="space-y-1.5">
-                        {items?.map((item, i) => <li key={i} className="text-xs text-ix-muted leading-relaxed">{item}</li>)}
+                    { label: "Strengths", items: selected.aiFeedback.strengths, color: "#34D399", bg: "rgba(52,211,153,0.06)", border: "rgba(52,211,153,0.18)" },
+                    { label: "Weaknesses", items: selected.aiFeedback.weaknesses, color: "#F87171", bg: "rgba(248,113,113,0.06)", border: "rgba(248,113,113,0.18)" },
+                    { label: "Suggestions", items: selected.aiFeedback.suggestions, color: "#60a5fa", bg: "rgba(96,165,250,0.06)", border: "rgba(96,165,250,0.18)" },
+                  ].map(({ label, items, color, bg, border }) => (
+                    <div key={label} style={{ borderRadius: "12px", padding: "16px", background: bg, border: `1px solid ${border}` }}>
+                      <p style={{ color, fontSize: "12px", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, marginBottom: "8px" }}>{label}</p>
+                      <ul style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                        {items?.map((item, i) => <li key={i} style={{ fontSize: "12px", color: "var(--ox-muted)", lineHeight: 1.6 }}>{item}</li>)}
                       </ul>
                     </div>
                   ))}
@@ -179,39 +175,36 @@ export default function AdminSubmissions() {
               </div>
             )}
 
-            {/* Review form */}
             {selected.status !== "published" && selected.status !== "rejected" && (
-              <div className="space-y-4">
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 <div>
-                  <label className="ix-label">Admin Score (0–100)</label>
-                  <input type="number" min="0" max="100" className="ix-input"
+                  <label className="ox-label">Admin Score (0–100)</label>
+                  <input type="number" min="0" max="100" className="ox-input"
                     placeholder={`Leave blank to use AI score (${selected.aiScore})`}
                     value={reviewForm.adminScore}
                     onChange={(e) => setReviewForm({ ...reviewForm, adminScore: e.target.value })} />
                 </div>
                 <div>
-                  <label className="ix-label">Internal Note</label>
-                  <textarea rows={3} className="ix-input resize-none" placeholder="Optional note for your records..."
+                  <label className="ox-label">Internal Note</label>
+                  <textarea rows={3} className="ox-input" placeholder="Optional note for your records..."
                     value={reviewForm.adminNote}
                     onChange={(e) => setReviewForm({ ...reviewForm, adminNote: e.target.value })} />
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => review(selected._id, "publish")}
                     disabled={actionLoading === `review_${selected._id}`}
-                    className="btn-primary flex-1 py-2.5">
+                    className="ox-btn-primary" style={{ flex: 1, padding: "11px", fontSize: "14px" }}>
                     ✓ Publish & Rank
                   </button>
-                  <button onClick={() => review(selected._id, "reject")} className="btn-danger px-4">
-                    Reject
-                  </button>
+                  <button onClick={() => review(selected._id, "reject")} className="ox-btn-danger" style={{ padding: "11px 20px" }}>Reject</button>
                 </div>
               </div>
             )}
 
-            {(selected.status === "published") && (
-              <div className="text-center py-4">
-                <p className="text-emerald-400 font-display font-semibold">Published · Final Score: {selected.finalScore}</p>
-                <p className="text-ix-muted text-sm">Rank #{selected.rank}</p>
+            {selected.status === "published" && (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <p style={{ color: "#34D399", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, fontSize: "15px" }}>Published · Final Score: {selected.finalScore}</p>
+                <p style={{ color: "var(--ox-muted)", fontSize: "13px", marginTop: "4px" }}>Rank #{selected.rank}</p>
               </div>
             )}
           </div>

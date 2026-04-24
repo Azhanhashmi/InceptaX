@@ -10,48 +10,48 @@ export default function AdminOverview() {
   }, []);
 
   const cards = stats ? [
-    { label: "Total Users", value: stats.users, icon: "◉", color: "#4f46e5" },
-    { label: "Active Challenges", value: stats.assignments, icon: "◈", color: "#06b6d4" },
-    { label: "Published Results", value: stats.submissions, icon: "◎", color: "#10b981" },
-    { label: "Pending Review", value: stats.pendingReview, icon: "◌", color: "#f59e0b" },
-    { label: "Premium Users", value: stats.premiumUsers, icon: "✦", color: "#a78bfa" },
+    { label: "Total Users", value: stats.users, icon: "◉", color: "var(--ox-orange)" },
+    { label: "Active Challenges", value: stats.assignments, icon: "◈", color: "#60a5fa" },
+    { label: "Published Results", value: stats.submissions, icon: "◎", color: "#34D399" },
+    { label: "Pending Review", value: stats.pendingReview, icon: "◌", color: "#FBBF24" },
+    { label: "Premium Users", value: stats.premiumUsers, icon: "✦", color: "var(--ox-orange)" },
   ] : [];
 
   return (
     <div className="page-enter">
-      <div className="mb-8">
-        <h1 className="font-display font-bold text-2xl text-ix-white mb-1">Overview</h1>
-        <p className="text-ix-muted text-sm">InceptaX platform at a glance</p>
+      <div style={{ marginBottom: "32px" }}>
+        <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "26px", color: "var(--ox-text)", marginBottom: "4px" }}>Overview</h1>
+        <p style={{ color: "var(--ox-muted)", fontSize: "13.5px" }}>InceptaX platform at a glance</p>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          {Array(5).fill(0).map((_, i) => <div key={i} className="ix-card h-24 skeleton" />)}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3" style={{ marginBottom: "32px" }}>
+          {Array(5).fill(0).map((_, i) => <div key={i} className="ox-skeleton" style={{ height: "96px" }} />)}
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3" style={{ marginBottom: "32px" }}>
           {cards.map((c) => (
-            <div key={c.label} className="ix-card p-5">
-              <div className="text-lg mb-3 font-mono" style={{ color: c.color }}>{c.icon}</div>
-              <div className="font-display font-bold text-2xl text-ix-white mb-1">{c.value}</div>
-              <div className="text-xs text-ix-muted">{c.label}</div>
+            <div key={c.label} className="ox-card" style={{ padding: "20px" }}>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "16px", marginBottom: "10px", color: c.color }}>{c.icon}</div>
+              <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "26px", color: "var(--ox-text)", marginBottom: "2px" }}>{c.value}</div>
+              <div style={{ fontSize: "11px", color: "var(--ox-muted)", textTransform: "uppercase", letterSpacing: ".05em" }}>{c.label}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Quick actions */}
-      <div className="ix-card p-6">
-        <h2 className="font-display font-semibold text-ix-white mb-4">Quick Actions</h2>
+      <div className="ox-card" style={{ padding: "24px" }}>
+        <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, color: "var(--ox-text)", fontSize: "15px", marginBottom: "16px" }}>Quick Actions</h2>
         <div className="grid sm:grid-cols-3 gap-3">
           {[
-            { label: "Review Pending Submissions", href: "/admin-portal/submissions?status=ai_evaluated", color: "#f59e0b" },
-            { label: "Create New Challenge", href: "/admin-portal/challenges", color: "#4f46e5" },
-            { label: "Send Email Blast", href: "/admin-portal/email", color: "#06b6d4" },
+            { label: "Review Pending Submissions", href: "/admin-portal/submissions?status=ai_evaluated", color: "#FBBF24" },
+            { label: "Create New Challenge", href: "/admin-portal/challenges", color: "var(--ox-orange)" },
+            { label: "Send Email Blast", href: "/admin-portal/email", color: "#60a5fa" },
           ].map((a) => (
-            <a key={a.label} href={a.href} className="ix-card p-4 hover:border-ix-border-bright transition-all group block">
-              <div className="text-sm font-display font-medium text-ix-white group-hover:text-white">{a.label}</div>
-              <div className="mt-2 h-0.5 w-8 rounded-full" style={{ background: a.color }} />
+            <a key={a.label} href={a.href} className="ox-card-hover" style={{ padding: "18px", display: "block", textDecoration: "none" }}>
+              <div style={{ fontSize: "13.5px", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, color: "var(--ox-text)", marginBottom: "10px" }}>{a.label}</div>
+              <div style={{ height: "2px", width: "32px", borderRadius: "2px", background: a.color }} />
             </a>
           ))}
         </div>

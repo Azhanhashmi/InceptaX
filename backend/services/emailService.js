@@ -6,6 +6,7 @@ let transporter = null;
 
 const getTransporter = () => {
   if (transporter) return transporter;
+
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: parseInt(process.env.SMTP_PORT) || 587,
@@ -14,12 +15,24 @@ const getTransporter = () => {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    tls: {
+      rejectUnauthorized: false, // ← add this
+    },
   });
+
   return transporter;
 };
 
 // ─── Base send function ──────────────────────────────────────────────────────
-const sendEmail = async ({ to, subject, html, userId = null, type = "custom", sentBy = null }) => {
+const sendEmail = async ({
+  to,
+  subject,
+  html,
+  attachments = [], // ✅ add this
+  userId = null,
+  type = "custom",
+  sentBy = null
+}) => {
   // Skip if SMTP not configured
   if (!process.env.SMTP_USER) {
     console.log(`📧 [MOCK EMAIL] To: ${to} | Subject: ${subject}`);
@@ -27,12 +40,13 @@ const sendEmail = async ({ to, subject, html, userId = null, type = "custom", se
   }
 
   try {
-    await getTransporter().sendMail({
-      from: process.env.FROM_EMAIL || "InceptaX <noreply@inceptax.io>",
-      to,
-      subject,
-      html,
-    });
+await getTransporter().sendMail({
+  from: process.env.FROM_EMAIL || "InceptaX <noreply@inceptax.io>",
+  to,
+  subject,
+  html,
+  attachments 
+});
 
     await EmailLog.create({ to, userId, type, subject, body: html, status: "sent", sentBy });
     return { success: true };
