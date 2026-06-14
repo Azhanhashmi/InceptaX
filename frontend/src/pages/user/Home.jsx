@@ -1,39 +1,41 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
+import { ProjectCard } from "@/components/ui/project-card";
+// Add import at top
+import { TestimonialCarousel } from "@/components/ui/testimonial-carousel";
 const features = [
   {
     title: "AI Evaluation",
     desc: "Every submission is analyzed by GPT for code quality, structure, and real-world impact.",
-    svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/><path d="M18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+    img: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&auto=format&fit=crop",
   },
   {
     title: "Per-Project Rankings",
     desc: "See exactly where you rank on every challenge — not just globally.",
-    svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+    img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop",
   },
   {
     title: "Team Collaboration",
     desc: "Invite partners, build together, and chat in real time. Premium plans only.",
-    svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+    img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop",
   },
   {
     title: "Admin-Curated Quality",
     desc: "Admins review AI results before publishing — no junk scores, ever.",
-    svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+    img: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&auto=format&fit=crop",
   },
   {
     title: "GitHub Integration",
     desc: "Submit your public repo directly. We analyse your commit history, README, and code.",
-    svg: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+    img: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&auto=format&fit=crop",
   },
   {
     title: "Public Portfolio",
     desc: "Every published project lives at /u/username — a live portfolio you can share with recruiters.",
-    svg: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+    img: "https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=800&auto=format&fit=crop",
   },
 ];
-
 const plans = [
   { id: "free", name: "Free", price: 0, period: null, tag: null, features: ["All public challenges", "AI evaluation (after admin review)", "Public portfolio at /u/username", "Global + per-project leaderboard"], cta: "Start Free", href: "/login" },
   { id: "ten_day", name: "10-Day Sprint", price: 99, period: "10 days", tag: "Popular", features: ["Everything in Free", "All premium challenges", "Team collaboration (up to 3)", "Real-time team chat", "Priority evaluation"], cta: "Start Sprint", href: "/login?plan=ten_day" },
@@ -95,23 +97,35 @@ export default function Home() {
           <div className="text-center" style={{ marginBottom: "52px" }}>
             <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ox-orange)", marginBottom: "8px" }}>Platform</p>
             <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "clamp(28px,3.2vw,40px)", color: "var(--ox-text)", letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: "10px" }}>Built for serious builders</h2>
-            <p style={{ color: "var(--ox-muted)", fontSize: "15px", fontWeight: 300 }}>Not just another portfolio project site.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map((f) => (
-              <div key={f.title} className="ox-card" style={{ padding: "28px", transition: "all .22s", cursor: "default" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,107,0,0.2)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--ox-border)"; e.currentTarget.style.transform = "translateY(0)"; }}>
-                <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px", color: "#fff" }}>
-                  <div style={{ width: "22px", height: "22px" }}>{f.svg}</div>
-                </div>
-                <h3 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, fontSize: "16px", color: "var(--ox-text)", marginBottom: "10px", letterSpacing: "-0.01em" }}>{f.title}</h3>
-                <p style={{ fontSize: "13.5px", color: "var(--ox-muted)", lineHeight: 1.7, fontWeight: 400 }}>{f.desc}</p>
-              </div>
-            ))}
-          </div>
+  {features.map((f) => (
+    <ProjectCard
+      key={f.title}
+      imgSrc={f.img}
+      title={f.title}
+      description={f.desc}
+      link="#"
+      linkText="Learn more"
+    />
+  ))}
+</div>
         </div>
       </section>
+      
+      {/* Testimonials */}
+<section style={{ padding: "88px 6%" }}>
+  <div className="max-w-5xl mx-auto">
+    <div className="text-center" style={{ marginBottom: "52px" }}>
+      <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ox-orange)", marginBottom: "8px" }}>Wall of Love</p>
+      <h2 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "clamp(28px,3.2vw,40px)", color: "var(--ox-text)", letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: "10px" }}>Builders who leveled up</h2>
+      <p style={{ color: "var(--ox-muted)", fontSize: "15px", fontWeight: 300 }}>Real results from real developers.</p>
+    </div>
+    <TestimonialCarousel />
+  </div>
+</section>
+
+<div className="ox-glow-line" style={{ maxWidth: "900px", margin: "0 auto" }} />
 
       {/* Pricing */}
       <section style={{ padding: "88px 6%" }} id="pricing">
