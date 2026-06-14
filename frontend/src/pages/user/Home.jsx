@@ -51,14 +51,10 @@ export default function Home() {
         <div style={{ position: "absolute", bottom: "-40px", left: "8%", width: "360px", height: "360px", background: "radial-gradient(circle, rgba(255,107,0,0.03) 0%, transparent 65%)", pointerEvents: "none" }} />
 
         <div className="max-w-5xl mx-auto w-full text-center" style={{ position: "relative", zIndex: 1 }}>
-          <div className="inline-flex items-center gap-2 mb-8 ox-live-badge">
-            <span className="ox-blink-dot" />
-            Challenges open
-          </div>
 
           <h1 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "clamp(46px, 6vw, 80px)", lineHeight: 1.0, letterSpacing: "-0.04em", color: "var(--ox-text)", marginBottom: "22px" }}>
             Where builders<br />
-            <em style={{ fontStyle: "normal", color: "var(--ox-orange)" }}>get ranked.</em>
+            <em style={{ fontStyle: "normal", color: "var(--ox-orange)" }}>get ranked</em>
           </h1>
 
           <p style={{ fontSize: "clamp(15px, 2vw, 18px)", color: "var(--ox-muted)", maxWidth: "560px", margin: "0 auto 36px", lineHeight: 1.8, fontWeight: 300 }}>
