@@ -8,17 +8,20 @@
     "build": "vite build",
     "preview": "vite preview"
   },
- "dependencies": {
-  "axios": "^1.6.2",
-  "date-fns": "^3.0.6",
-  "firebase": "^10.7.0",
-  "lucide-react": "^0.5xx.x",
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0",
-  "react-hot-toast": "^2.4.1",
-  "react-router-dom": "^6.20.1",
-  "socket.io-client": "^4.6.1"
-},
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.5",
+    "axios": "^1.6.2",
+    "class-variance-authority": "^0.7.1",
+    "date-fns": "^3.0.6",
+    "firebase": "^10.7.0",
+    "framer-motion": "^12.40.0",
+    "lucide-react": "^1.18.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^6.20.1",
+    "socket.io-client": "^4.6.1"
+  },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
