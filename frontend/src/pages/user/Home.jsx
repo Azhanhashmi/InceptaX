@@ -37,7 +37,7 @@ const features = [
   },
 ];
 const plans = [
-  { id: "free", name: "Free", price: 0, period: null, tag: null, features: ["All public challenges", "AI evaluation (after admin review)", "Public portfolio at /u/username", "Global + per-project leaderboard"], cta: "Start Free", href: "/login" },
+  { id: "free", name: "Free", price: 0, period: null, tag: null, features: ["All public challenges", "AI evaluation (after admin review)", "Public portfolio at /u/username", "Global + per-project leaderboard", "Community access"], cta: "Start Free", href: "/login" },
   { id: "ten_day", name: "10-Day Sprint", price: 99, period: "10 days", tag: "Popular", features: ["Everything in Free", "All premium challenges", "Team collaboration (up to 3)", "Real-time team chat", "Priority evaluation"], cta: "Start Sprint", href: "/login?plan=ten_day" },
   { id: "monthly", name: "Monthly Pro", price: 199, period: "month", tag: "Best Value", features: ["Everything in Sprint", "Unlimited team members", "Exclusive monthly challenges", "Pro badge on profile", "Early feature access"], cta: "Go Pro", href: "/login?plan=monthly" },
 ];
@@ -136,46 +136,79 @@ export default function Home() {
             <p style={{ color: "var(--ox-muted)", fontSize: "15px", fontWeight: 300 }}>Start free. Upgrade when you need teams.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {plans.map((plan) => {
-              const isPopular = plan.id === "monthly";
-              return (
-                <div key={plan.id} className="ox-card" style={{ padding: "28px", display: "flex", flexDirection: "column", position: "relative",
-                  ...(isPopular ? { borderColor: "var(--ox-orange-bd)", boxShadow: "0 0 40px rgba(255,107,0,0.10), 0 0 0 1px rgba(255,107,0,0.22)" } : {}) }}>
-                  {plan.tag && (
-                    <div style={{ position: "absolute", top: "-13px", left: "50%", transform: "translateX(-50%)", padding: "3px 14px", borderRadius: "100px", fontSize: "11px", fontFamily: "'Inter',sans-serif", fontWeight: 700, background: "var(--ox-orange)", color: "#fff" }}>
-                      {plan.tag}
-                    </div>
-                  )}
-
-                  <div style={{ marginBottom: "22px" }}>
-                    <h3 style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, color: "var(--ox-text)", fontSize: "16px", marginBottom: "10px" }}>{plan.name}</h3>
-                    <div className="flex items-baseline gap-1">
-                      <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "34px", color: "var(--ox-text)" }}>
-                        {plan.price === 0 ? "₹0" : `₹${plan.price}`}
-                      </span>
-                      {plan.period && <span style={{ color: "var(--ox-muted)", fontSize: "13px" }}>/ {plan.period}</span>}
-                    </div>
-                  </div>
-
-                  <ul style={{ marginBottom: "28px", flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2" style={{ fontSize: "12.5px", color: "var(--ox-muted)", fontWeight: 400 }}>
-                        <span style={{ color: "#34D399", marginTop: "2px", flexShrink: 0 }}>✓</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link to={user ? "/dashboard" : plan.href}
-                    className={isPopular ? "ox-btn-brand" : "ox-btn-ghost"}
-                    style={{ textAlign: "center", fontSize: "13.5px", padding: "11px" }}>
-                    {user ? "Open Dashboard" : plan.cta}
-                  </Link>
-                </div>
-              );
-            })}
+         <div className="grid md:grid-cols-3 gap-5 items-stretch">
+  {plans.map((plan) => {
+    const isPopular = plan.id === "monthly";
+    return (
+      <div key={plan.id} style={{
+        padding: "6px",
+        borderRadius: "16px",
+        border: "1px solid",
+        borderColor: isPopular ? "var(--ox-orange-bd)" : "var(--ox-border)",
+        boxShadow: isPopular ? "0 0 48px rgba(255,107,0,0.12), 0 0 0 1px rgba(255,107,0,0.22)" : "0 20px 60px rgba(0,0,0,0.4)",
+        background: "var(--ox-card, #111)",
+        backdropFilter: "blur(12px)",
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+      }}>
+        {/* Tag */}
+        {plan.tag && (
+          <div style={{ position: "absolute", top: "-13px", left: "50%", transform: "translateX(-50%)", padding: "3px 14px", borderRadius: "100px", fontSize: "11px", fontFamily: "'Inter',sans-serif", fontWeight: 700, background: "var(--ox-orange)", color: "#fff", whiteSpace: "nowrap" }}>
+            {plan.tag}
           </div>
+        )}
+
+        {/* Header */}
+        <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", padding: "20px", marginBottom: "4px", position: "relative", overflow: "hidden" }}>
+          <div aria-hidden="true" style={{ position: "absolute", inset: 0, height: "120px", borderRadius: "inherit", background: "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 50%, transparent 100%)", pointerEvents: "none" }} />
+
+          {/* Plan name + badge */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+            <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ox-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{plan.name}</span>
+            <span style={{ border: "1px solid", borderColor: isPopular ? "rgba(255,107,0,0.4)" : "var(--ox-border)", color: isPopular ? "var(--ox-orange)" : "var(--ox-muted)", borderRadius: "100px", padding: "2px 10px", fontSize: "11px", fontWeight: 500 }}>
+              {plan.price === 0 ? "No credit card" : isPopular ? "Best Value" : "Short & focused"}
+            </span>
+          </div>
+
+          {/* Price */}
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "4px", marginBottom: "16px" }}>
+            <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "36px", color: "var(--ox-text)", letterSpacing: "-0.03em" }}>
+              {plan.price === 0 ? "₹0" : `₹${plan.price}`}
+            </span>
+            {plan.period && <span style={{ fontSize: "13px", color: "var(--ox-muted)", paddingBottom: "6px" }}>/ {plan.period}</span>}
+          </div>
+
+          {/* CTA */}
+          <Link
+            to={user ? "/dashboard" : plan.href}
+            style={{
+              display: "block", width: "100%", padding: "11px", fontSize: "13.5px",
+              borderRadius: "10px", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
+              textAlign: "center", textDecoration: "none", transition: "all .2s ease",
+              ...(isPopular
+                ? { background: "linear-gradient(to bottom, #ff6b00, #e55a00)", color: "#fff", border: "none", boxShadow: "0 10px 25px rgba(255,107,0,0.3)" }
+                : { background: "rgba(255,255,255,0.06)", color: "var(--ox-text)", border: "1px solid var(--ox-border)" }
+              ),
+            }}
+          >
+            {user ? "Open Dashboard" : plan.cta}
+          </Link>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: "16px 12px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+          {plan.features.map((f) => (
+            <div key={f} style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "13px", color: "var(--ox-muted)" }}>
+              <span style={{ color: "#34D399", flexShrink: 0, marginTop: "1px" }}>✓</span>
+              <span>{f}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  })}
+</div>
         </div>
       </section>
 
